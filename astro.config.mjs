@@ -7,8 +7,7 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig({
   // Hace falta para que las etiquetas og: del layout salgan con la
   // dirección completa: WhatsApp no lee rutas relativas.
-  // Plantilla de muestra: se cambia por la dirección de cada cliente.
-  site: "https://boda-sebastian-y-valeria.vercel.app",
+  site: "https://boda-victor-y-paola-2026.vercel.app",
   vite: {
     plugins: [tailwindcss()]
   }
