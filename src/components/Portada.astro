@@ -1,0 +1,798 @@
+---
+// src/components/Portada.astro - Portada de una sola pantalla:
+//   marco de flores + anuncio + fecha + el sobre.
+//
+// El sobre son tres imágenes apiladas, en este orden:
+//   1. sobre1.png  — el sobre de atrás (el que abre y marca el alto)
+//   2. foto1.jpg   — la foto, que sale desde adentro del sobre
+//   3. sobre2.png  — la tapa de adelante con el sello, que la tapa abajo
+//
+// Se toca el sobre: arranca la música y se abre la invitación.
+//
+// El nombre del invitado llega desde la página: las personalizadas
+// (/[slug]) lo pasan tal cual está escrito en lista.txt, y la genérica (/)
+// no lo pasa, así que esa línea directamente no se dibuja.
+import Adorno from "./Adorno.astro";
+
+interface Props {
+    invitado?: string;
+}
+
+const { invitado } = Astro.props;
+
+// ── DATOS EDITABLES ───────────────────────────────────────────
+const anuncio = "¡Nos Casamos!";
+const fecha = "12.12.26";
+const textoSobre1 = "Presiona el sobre para";
+const textoSobre2 = "abrir tu invitación";
+// ──────────────────────────────────────────────────────────────
+---
+
+<!-- CAPA BLANCA DE TRANSICIÓN — tapa el fondo del layout durante el fade -->
+<div
+    id="capa-blanca"
+    style="
+    position: fixed;
+    inset: 0;
+    background: #ffffff;
+    z-index: 8499;
+    opacity: 1;
+    pointer-events: none;
+"
+>
+</div>
+
+<!--
+   La portada va por debajo del botón flotante de música (z 9000): una vez
+   tocado el sobre la melodía ya suena y el invitado tiene que poder
+   pausarla mientras termina la transición.
+-->
+<section
+    class="fixed inset-0 w-full h-screen flex justify-center z-[8500]"
+    id="portada-section"
+    style="background-color: #e9e4dd;"
+>
+    <!-- Columna móvil: el diseño nunca se estira en tablet / PC -->
+    <div class="portada-columna">
+        <!-- Marco de flores: una por esquina, detrás del contenido -->
+        <div id="flores-portada">
+            <img
+                src="/imagenes/flor4.png"
+                alt=""
+                width="361"
+                height="394"
+                class="flor flor-1"
+            />
+            <img
+                src="/imagenes/flor2-derecha.png"
+                alt=""
+                width="300"
+                height="813"
+                class="flor flor-2"
+            />
+            <img
+                src="/imagenes/flor2-abajo.png"
+                alt=""
+                width="300"
+                height="813"
+                class="flor flor-3"
+            />
+            <img
+                src="/imagenes/flor4-abajo.png"
+                alt=""
+                width="361"
+                height="394"
+                class="flor flor-4"
+            />
+        </div>
+
+        <!-- Destellos que suben despacio: los crea el script -->
+        <div id="destellos-portada" aria-hidden="true"></div>
+
+        <div class="portada-contenido">
+            <h1 id="anuncio" class="anuncio font-charm">{anuncio}</h1>
+
+            <!-- Adorno dorado, el mismo del versículo -->
+            <Adorno id="adorno-portada" class="adorno" />
+
+            <p id="fecha" class="fecha font-simonetta">{fecha}</p>
+
+            {
+                invitado && (
+                    <p id="invitado-portada" class="invitado font-simonetta">
+                        {invitado}
+                    </p>
+                )
+            }
+
+            <!-- EL SOBRE: sobre1 (atrás) + foto1 (sale) + sobre2 (adelante) -->
+            <div id="sobre-container" class="sobre-container">
+                <img
+                    id="sobre-trasero"
+                    src="/imagenes/sobre1.png"
+                    alt="Sobre de invitación"
+                    width="862"
+                    height="992"
+                    class="sobre-trasero"
+                />
+
+                <!-- El recorte esconde la foto por debajo del borde del sobre -->
+                <div class="foto-recorte">
+                    <div id="foto-sobre" class="foto-sobre">
+                        <img src="/imagenes/foto1.jpg" alt="Los novios" />
+                    </div>
+                </div>
+
+                <img
+                    id="sobre-frente"
+                    src="/imagenes/sobre2.png"
+                    alt=""
+                    width="862"
+                    height="577"
+                    class="sobre-frente"
+                    aria-hidden="true"
+                />
+            </div>
+
+            <!-- Instrucción -->
+            <p id="instruccion" class="instruccion font-cormorant">
+                {textoSobre1}<br />{textoSobre2}
+            </p>
+        </div>
+    </div>
+</section>
+
+<style>
+    /*
+       Las fuentes de la portada se sirven desde /fonts/ del propio sitio:
+       traerlas de afuera obliga a dos viajes a internet antes de poder
+       dibujar el anuncio, y con señal regular el nombre tarda en aparecer.
+    */
+    @font-face {
+        font-family: "Simonetta";
+        src: url("/fonts/Simonetta-Regular.ttf") format("truetype");
+        font-weight: 400;
+        font-style: normal;
+        font-display: swap;
+    }
+
+    .font-simonetta {
+        font-family: "Simonetta", serif;
+    }
+
+    .portada-columna {
+        --azul: #6e0f1c;
+        --azul-claro: #c0485a;
+        --dorado: #c6a24a;
+
+        position: relative;
+        width: 100%;
+        max-width: 430px;
+        height: 100%;
+        overflow: hidden;
+        /* el mismo papel que el resto de la invitación, estirado a la pantalla */
+        background-color: #f7f5f2;
+        background-image: url("/imagenes/fondoblanco.jpg");
+        background-size: 100% 100%;
+        background-repeat: no-repeat;
+        box-shadow: 0 0 40px rgba(0, 0, 0, 0.08);
+    }
+
+    /*
+       Las flores van una por esquina. El ancho de cada una es el que tenía
+       dentro del marco completo (sobre 941 de ancho): flor1 51%, flor2 25%,
+       flor3 22%. Así el ramo conserva la escala original y el alto sale
+       solo, sin estirar nada.
+       Arriba a la izquierda y abajo a la derecha va el mismo ramo, flor4:
+       abajo girado 180° en su propio archivo, porque la animación de las
+       flores escribe el transform y le borraría un giro hecho con CSS.
+    */
+    #flores-portada {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .flor {
+        position: absolute;
+        height: auto;
+    }
+
+    /* flor4 tal cual viene: el ramo ya nace de esta esquina */
+    .flor-1 {
+        top: 0;
+        left: 0;
+        width: 42%;
+    }
+
+    /*
+       Las dos esquinas chicas usan el mismo ramo angosto (flor2), con el
+       corte del ramo siempre contra el borde: espejado a la derecha arriba
+       y dado vuelta abajo a la izquierda, cada uno en su archivo.
+    */
+    .flor-2 {
+        top: 0;
+        right: 0;
+        width: 17%;
+    }
+
+    .flor-3 {
+        bottom: 0;
+        left: 0;
+        width: 17%;
+    }
+
+    /* El mismo ramo girado 180° en el archivo (flor4-abajo.png) */
+    .flor-4 {
+        bottom: 0;
+        right: 0;
+        width: 38%;
+    }
+
+    .portada-contenido {
+        position: relative;
+        z-index: 2;
+        width: 100%;
+        height: 100%;
+        padding: 0 1.5rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+
+    /* El anuncio en un solo rojo, sin degradado */
+    .anuncio {
+        color: #8e1426;
+        font-size: clamp(2rem, 10vw, 2.6rem);
+        line-height: 1.15;
+        /* aire para que el recorte de la escritura no corte los rulos */
+        padding: 0.1em 0.2em;
+    }
+
+    /*
+       Destellos: puntitos de luz dorada que suben despacio por detrás del
+       contenido. Delante de las flores, detrás del texto y del sobre.
+    */
+    #destellos-portada {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        z-index: 1;
+        overflow: hidden;
+    }
+
+    :global(.destello) {
+        position: absolute;
+        border-radius: 50%;
+        background-color: rgba(198, 162, 74, 0.6);
+        will-change: transform, opacity;
+    }
+
+    .adorno {
+        display: block;
+        width: min(58%, 210px);
+        height: auto;
+        margin-top: 0.7rem;
+        color: var(--dorado);
+    }
+
+    /* La fecha en dorado, como el adorno de arriba */
+    .fecha {
+        margin-top: 0.7rem;
+        color: var(--dorado);
+        font-size: clamp(1.05rem, 5.2vw, 1.35rem);
+        letter-spacing: 0.34em;
+        /* compensa el espaciado que el último carácter deja a la derecha */
+        text-indent: 0.34em;
+    }
+
+    /*
+       El nombre del invitado no se fuerza a un solo renglón: los largos
+       ("Familia Rodríguez Fernández") bajan de línea en vez de achicarse
+       hasta no leerse.
+    */
+    .invitado {
+        margin-top: 0.9rem;
+        max-width: 20rem;
+        color: var(--azul);
+        font-size: clamp(0.85rem, 4vw, 1.02rem);
+        letter-spacing: 0.06em;
+        line-height: 1.5;
+    }
+
+    /*
+       El alto del bloque lo marca sobre1: las otras dos imágenes van
+       absolutas adentro, así las tres quedan siempre alineadas.
+    */
+    .sobre-container {
+        position: relative;
+        width: 100%;
+        max-width: 215px;
+        margin-top: 3.6rem;
+        cursor: pointer;
+        user-select: none;
+        filter: drop-shadow(0 16px 26px rgba(0, 0, 0, 0.22));
+    }
+
+    .sobre-trasero {
+        position: relative;
+        display: block;
+        width: 100%;
+        height: auto;
+        z-index: 1;
+    }
+
+    /*
+       La foto sale de adentro del sobre. El left sale del ancho —(100-78)/2—
+       en vez de un translateX, porque el translate lo maneja GSAP para el
+       efecto de salida y se pisarían.
+    */
+    /*
+       Mientras la foto sube desde adentro arranca más abajo que el sobre
+       (el yPercent la esconde detrás de la tapa) y asomaba por debajo.
+       Este recorte corta todo lo que pase del borde de abajo del sobre y
+       deja libre arriba y a los costados, por donde la foto sale y gira.
+    */
+    .foto-recorte {
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+        clip-path: inset(-300% -100% 0 -100%);
+    }
+
+    .foto-sobre {
+        position: absolute;
+        left: 11%;
+        bottom: 26%;
+        width: 78%;
+        aspect-ratio: 4 / 5;
+        z-index: 2;
+        border-radius: 2px;
+        overflow: hidden;
+        will-change: transform;
+    }
+
+    .foto-sobre img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+
+    .sobre-frente {
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        height: auto;
+        z-index: 3;
+    }
+
+    /* Cormorant recta, semibold y en mayúsculas, sin espaciar */
+    .instruccion {
+        margin-top: 1.4rem;
+        color: var(--azul);
+        font-size: clamp(1.1rem, 5vw, 1.25rem);
+        font-style: normal;
+        font-weight: 600;
+        letter-spacing: 0;
+        line-height: 1.6;
+        text-transform: uppercase;
+    }
+
+    body.portada-activa {
+        overflow: hidden !important;
+        height: 100vh !important;
+    }
+
+    /* La capa blanca tapa el fondo del layout siempre */
+    #capa-blanca {
+        transition: opacity 0.4s ease;
+    }
+</style>
+
+<script>
+    import { gsap } from "gsap";
+
+    if (typeof window !== "undefined") {
+        document.addEventListener("DOMContentLoaded", () => {
+            document.body.classList.add("portada-activa");
+
+            const portadaSection = document.getElementById("portada-section");
+            const capaBlanca = document.getElementById("capa-blanca");
+            const anuncio = document.getElementById("anuncio");
+            const fecha = document.getElementById("fecha");
+            const adorno = document.getElementById("adorno-portada");
+            const invitado = document.getElementById("invitado-portada");
+            const sobreContainer = document.getElementById("sobre-container");
+            const foto = document.getElementById("foto-sobre");
+            const sobreTrasero = document.getElementById("sobre-trasero");
+            const sobreFrente = document.getElementById("sobre-frente");
+            const instruccion = document.getElementById("instruccion");
+            const destellos = document.getElementById("destellos-portada");
+            const florList = Array.from(
+                document.querySelectorAll<HTMLElement>("#flores-portada .flor"),
+            );
+            if (!sobreContainer) return;
+
+            // Con "reducir movimiento" activado se hace la entrada, pero sin
+            // los movimientos que quedan sonando de fondo.
+            const sinMovimiento = window.matchMedia(
+                "(prefers-reduced-motion: reduce)",
+            ).matches;
+
+            // Todo lo que queda en bucle se junta acá para cortarlo al abrir
+            const bucles: (gsap.core.Tween | gsap.core.Timeline)[] = [];
+
+            // Cada flor crece desde su propia esquina
+            const esquinas = [
+                "top left",
+                "top right",
+                "bottom left",
+                "bottom right",
+            ];
+
+            // ── Estado inicial ──────────────────────────────────────
+            // La foto arranca metida adentro del sobre, tapada por la tapa
+            // de adelante: el yPercent la baja justo hasta esconderla.
+            florList.forEach((flor, i) => {
+                gsap.set(flor, {
+                    opacity: 0,
+                    scale: 0.82,
+                    rotate: i % 2 === 0 ? -4 : 4,
+                    transformOrigin: esquinas[i] ?? "center",
+                });
+            });
+            // El anuncio se "escribe": un recorte que se abre de izquierda
+            // a derecha mientras la letra se desenfoca de a poco.
+            gsap.set(anuncio, {
+                opacity: 0,
+                y: 10,
+                clipPath: "inset(0% 100% 0% 0%)",
+                filter: "blur(6px)",
+            });
+            // El adorno se abre desde el rombo del centro hacia los costados
+            gsap.set(adorno, { opacity: 0, scaleX: 0.15 });
+            gsap.set(fecha, {
+                opacity: 0,
+                y: 10,
+                letterSpacing: "0.75em",
+                textIndent: "0.75em",
+            });
+            if (invitado) gsap.set(invitado, { opacity: 0, y: 14 });
+            gsap.set(sobreContainer, { opacity: 0, y: 40, scale: 0.94 });
+            // Además arranca inclinada hacia atrás, acostada dentro del sobre:
+            // al salir se va parando en 3D. La perspectiva va en la propia
+            // foto porque el drop-shadow del sobre aplanaría la de un padre.
+            gsap.set(foto, {
+                yPercent: 62,
+                opacity: 0,
+                scale: 0.96,
+                rotationX: 38,
+                rotationY: -8,
+                transformPerspective: 700,
+                transformOrigin: "50% 100%",
+                boxShadow: "0 0px 0px rgba(0,0,0,0)",
+            });
+
+            // ── Entrada ─────────────────────────────────────────────
+            // Todo arranca en el mismo instante y con el mismo ritmo: las
+            // flores crecen desde sus esquinas, el anuncio se escribe, el
+            // adorno se abre, la fecha se junta, el sobre sube y la foto sale
+            // de adentro parándose en 3D. Una sola entrada, sin esperas.
+            const tl = gsap.timeline({
+                delay: 0.3,
+                defaults: { duration: 1.8, ease: "power3.out" },
+            });
+
+            tl.to(florList, { opacity: 1, scale: 1, rotate: 0 }, 0)
+                .to(
+                    anuncio,
+                    {
+                        opacity: 1,
+                        y: 0,
+                        clipPath: "inset(0% 0% 0% 0%)",
+                        filter: "blur(0px)",
+                        ease: "power2.inOut",
+                        clearProps: "clipPath,filter",
+                    },
+                    0,
+                )
+                .to(adorno, { opacity: 1, scaleX: 1, ease: "power2.inOut" }, 0)
+                // La fecha llega abierta y se va juntando hasta su espaciado
+                .to(
+                    fecha,
+                    {
+                        opacity: 1,
+                        y: 0,
+                        letterSpacing: "0.34em",
+                        textIndent: "0.34em",
+                        clearProps: "letterSpacing,textIndent",
+                    },
+                    0,
+                )
+                .to(sobreContainer, { opacity: 1, y: 0, scale: 1 }, 0)
+                // La foto sube desde adentro del sobre a la par: pasa un pelo
+                // de largo y se acomoda, se para en 3D y gana sombra
+                .to(foto, { opacity: 1, duration: 0.6, ease: "none" }, 0)
+                .to(foto, { yPercent: 0, scale: 1, ease: "back.out(0.9)" }, 0)
+                .to(foto, { rotationX: 0, rotationY: 0 }, 0)
+                .to(foto, { boxShadow: "0 10px 20px rgba(0,0,0,0.25)" }, 0)
+                .to(instruccion, { opacity: 1, y: 0 }, 0);
+
+            if (invitado) tl.to(invitado, { opacity: 1, y: 0 }, 0);
+
+            // ── Destellos ───────────────────────────────────────────
+            // Cada uno sube despacio con una leve deriva, brilla a mitad de
+            // camino y se apaga; al terminar vuelve a nacer en otro lugar.
+            const azar = (min: number, max: number) =>
+                min + Math.random() * (max - min);
+
+            const animarDestello = (d: HTMLElement, espera: number) => {
+                const alto = destellos?.clientHeight || window.innerHeight;
+                const duracion = azar(9, 15);
+                d.style.left = `${azar(4, 96)}%`;
+                const vida = gsap.timeline({
+                    delay: espera,
+                    onComplete: () => {
+                        const i = bucles.indexOf(vida);
+                        if (i > -1) bucles.splice(i, 1);
+                        animarDestello(d, azar(0, 2.5));
+                    },
+                });
+                vida.fromTo(
+                    d,
+                    { y: 0, x: 0, opacity: 0, scale: azar(0.6, 1.1) },
+                    {
+                        y: -alto * azar(0.55, 1.05),
+                        x: azar(-35, 35),
+                        duration: duracion,
+                        ease: "none",
+                    },
+                    0,
+                )
+                    .to(
+                        d,
+                        {
+                            opacity: azar(0.55, 0.95),
+                            duration: duracion * 0.3,
+                            ease: "sine.out",
+                        },
+                        0,
+                    )
+                    .to(
+                        d,
+                        { opacity: 0, duration: duracion * 0.35, ease: "sine.in" },
+                        duracion * 0.65,
+                    );
+                bucles.push(vida);
+            };
+
+            // Los destellos arrancan con las flores, no al final
+            if (destellos && !sinMovimiento) {
+                for (let i = 0; i < 16; i++) {
+                    const d = document.createElement("span");
+                    d.className = "destello";
+                    const lado = azar(4, 9);
+                    d.style.width = `${lado}px`;
+                    d.style.height = `${lado}px`;
+                    d.style.top = "100%";
+                    destellos.appendChild(d);
+                    animarDestello(d, 0.6 + azar(0, 8));
+                }
+            }
+
+            // ── Movimiento de fondo (invita a tocar el sobre) ───────
+            // El sobre respira y la foto se mece apenas, un poco más lenta:
+            // desfasadas se ve vivo, en fase parecería una sola estampa.
+            // Las flores se mecen desde su esquina, como con brisa.
+            tl.add(() => {
+                if (sinMovimiento) return;
+
+                bucles.push(
+                    gsap.to(sobreContainer, {
+                        y: -8,
+                        duration: 2.4,
+                        repeat: -1,
+                        yoyo: true,
+                        ease: "sine.inOut",
+                    }),
+                    // La foto flota girando apenas en 3D, como una tarjeta
+                    // que se mueve con la luz
+                    gsap.to(foto, {
+                        yPercent: -1.6,
+                        rotationY: 6,
+                        rotationX: -3,
+                        duration: 3.2,
+                        repeat: -1,
+                        yoyo: true,
+                        ease: "sine.inOut",
+                    }),
+                    // La invitación a tocar late suave, sin desaparecer
+                    gsap.to(instruccion, {
+                        opacity: 0.55,
+                        duration: 1.8,
+                        repeat: -1,
+                        yoyo: true,
+                        ease: "sine.inOut",
+                    }),
+                );
+
+                florList.forEach((flor, i) => {
+                    bucles.push(
+                        gsap.to(flor, {
+                            rotate: i % 2 === 0 ? 1.4 : -1.4,
+                            duration: azar(4.5, 6.5),
+                            repeat: -1,
+                            yoyo: true,
+                            ease: "sine.inOut",
+                        }),
+                    );
+                });
+            });
+
+            // ── Hover ───────────────────────────────────────────────
+            // El escalado va por GSAP y no con hover:scale de Tailwind:
+            // el latido de arriba escribe transform inline y le ganaría.
+            sobreContainer.addEventListener("mouseenter", () => {
+                gsap.to(sobreContainer, {
+                    scale: 1.04,
+                    duration: 0.3,
+                    ease: "power2.out",
+                });
+            });
+            sobreContainer.addEventListener("mouseleave", () => {
+                gsap.to(sobreContainer, {
+                    scale: 1,
+                    duration: 0.3,
+                    ease: "power2.out",
+                });
+            });
+
+            // ── Click en el sobre: música y adentro ──────────────────
+            let abriendo = false;
+            sobreContainer.addEventListener("click", () => {
+                if (abriendo) return;
+                abriendo = true;
+
+                bucles.forEach((b) => b.kill());
+                gsap.killTweensOf([sobreContainer, foto, instruccion]);
+
+                // La melodía arranca acá; el botón flotante de
+                // BotonMusica.astro aparece solo al detectarla.
+                const audio = new Audio("/musica/melodia.mp3");
+                audio.loop = true;
+                audio.volume = 0.5;
+                audio.play().catch((error) => {
+                    console.log("❌ Error al reproducir audio:", error);
+                });
+                (window as any).audioGlobal = audio;
+                (window as any).estaReproduciendoGlobal = true;
+
+                // Lluvia de destellos que se abre desde el centro de la foto
+                const estallido = () => {
+                    if (!destellos || !foto || sinMovimiento) return;
+                    const caja = destellos.getBoundingClientRect();
+                    const f = foto.getBoundingClientRect();
+                    const cx = f.left + f.width / 2 - caja.left;
+                    const cy = f.top + f.height / 2 - caja.top;
+                    for (let i = 0; i < 22; i++) {
+                        const d = document.createElement("span");
+                        d.className = "destello";
+                        const lado = azar(5, 11);
+                        d.style.width = `${lado}px`;
+                        d.style.height = `${lado}px`;
+                        d.style.left = `${cx - lado / 2}px`;
+                        d.style.top = `${cy - lado / 2}px`;
+                        destellos.appendChild(d);
+                        const angulo = (i / 22) * Math.PI * 2 + azar(-0.2, 0.2);
+                        const radio = azar(90, 170);
+                        gsap.timeline()
+                            .fromTo(
+                                d,
+                                { x: 0, y: 0, scale: 0.3, opacity: 0 },
+                                {
+                                    x: Math.cos(angulo) * radio,
+                                    y: Math.sin(angulo) * radio,
+                                    scale: azar(0.8, 1.3),
+                                    duration: azar(1, 1.5),
+                                    ease: "power3.out",
+                                },
+                            )
+                            .to(d, { opacity: 1, duration: 0.2 }, 0)
+                            .to(d, { opacity: 0, duration: 0.7, ease: "sine.in" }, 0.5);
+                    }
+                };
+
+                gsap.timeline()
+                    // La foto sale del todo y se viene encima
+                    .to(foto, {
+                        yPercent: -38,
+                        rotationX: 0,
+                        rotationY: 0,
+                        scale: 1.1,
+                        boxShadow:
+                            "0 22px 38px rgba(0,0,0,0.3), 0 0 34px rgba(255,236,190,0.75)",
+                        duration: 0.75,
+                        ease: "power3.out",
+                    })
+                    // Ya afuera da una vuelta entera en 3D, con los destellos
+                    // abriéndose alrededor
+                    .to(
+                        foto,
+                        {
+                            rotationY: 360,
+                            duration: 1.3,
+                            ease: "power3.inOut",
+                        },
+                        0.35,
+                    )
+                    .add(() => {
+                        estallido();
+                    }, 0.6)
+                    // El sobre se queda atrás mientras la foto se adelanta
+                    .to(
+                        [sobreTrasero, sobreFrente],
+                        {
+                            opacity: 0,
+                            y: 18,
+                            duration: 0.5,
+                            ease: "power2.in",
+                        },
+                        0.45,
+                    )
+                    .to(
+                        [instruccion, anuncio, adorno, fecha, invitado].filter(Boolean),
+                        {
+                            opacity: 0,
+                            y: -10,
+                            duration: 0.4,
+                            stagger: 0.05,
+                            ease: "power2.in",
+                        },
+                        0.15,
+                    )
+                    .to(
+                        sobreContainer,
+                        {
+                            opacity: 0,
+                            scale: 1.35,
+                            duration: 0.6,
+                            ease: "power2.in",
+                        },
+                        1.5,
+                    )
+                    .to(
+                        portadaSection,
+                        {
+                            opacity: 0,
+                            duration: 0.5,
+                            ease: "power2.in",
+                            onStart: () => {
+                                document.body.classList.remove(
+                                    "portada-activa",
+                                );
+                                document.body.style.overflow = "auto";
+                            },
+                            onComplete: () => {
+                                portadaSection?.remove();
+                                // Desvanecer la capa blanca suavemente
+                                gsap.to(capaBlanca, {
+                                    opacity: 0,
+                                    duration: 0.4,
+                                    ease: "power2.out",
+                                    onComplete: () => capaBlanca?.remove(),
+                                });
+                                window.scrollTo({ top: 0, behavior: "smooth" });
+                            },
+                        },
+                        1.75,
+                    );
+            });
+        });
+    }
+</script>

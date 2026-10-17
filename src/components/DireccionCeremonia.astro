@@ -1,0 +1,26 @@
+---
+// src/components/DireccionCeremonia.astro
+// La ceremonia religiosa: solo los datos. El diseño está en TarjetaLugar.
+import TarjetaLugar from "./TarjetaLugar.astro";
+
+// ── DATOS EDITABLES ───────────────────────────────────────────
+const titulo = "Ceremonia Religiosa";
+const lugar = "Parroquia San Ildefonso";
+const direccion = "Quillacollo";
+const hora = "13:00 hrs.";
+// Búsqueda de Google Maps: si el cliente manda su enlace, se reemplaza por ese
+const enlaceMapa = "https://www.google.com/maps/search/?api=1&query=Parroquia%20San%20Ildefonso%2C%20Quillacollo%2C%20Cochabamba";
+const textoBoton = "Ver ubicación";
+// ──────────────────────────────────────────────────────────────
+---
+
+<TarjetaLugar
+    id="ceremonia"
+    titulo={titulo}
+    icono="iglesia.png"
+    lugar={lugar}
+    direccion={direccion}
+    hora={hora}
+    enlaceMapa={enlaceMapa}
+    textoBoton={textoBoton}
+/>

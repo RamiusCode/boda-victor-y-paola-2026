@@ -1,0 +1,110 @@
+---
+// src/components/Versiculo.astro
+// Un versículo corto entre adornos dorados: comillas, el texto en azul y la
+// cita bíblica en dorado entre dos líneas finas. Todo en Charm, la letra
+// de los títulos; Charm no tolera mayúsculas forzadas ni espaciado.
+import Adorno from "./Adorno.astro";
+
+// ── DATOS EDITABLES ───────────────────────────────────────────
+const versiculo =
+    "Así que no son ya más dos, sino una sola carne; por tanto, lo que Dios juntó, no lo separe el hombre.";
+const cita = "Mateo 19:6";
+// ──────────────────────────────────────────────────────────────
+---
+
+<section id="versiculo" class="versiculo">
+    <!-- Adorno de arriba: dos líneas que se afinan hacia un rombo -->
+    <Adorno class="adorno" />
+
+    <p class="comillas" aria-hidden="true">“</p>
+
+    <p class="texto">{versiculo}</p>
+
+    <p class="cita">
+        <span class="raya" aria-hidden="true"></span>
+        {cita}
+        <span class="raya" aria-hidden="true"></span>
+    </p>
+</section>
+
+<style>
+    .versiculo {
+        --azul: #8e1426;
+        --dorado: #c6a24a;
+
+        width: 100%;
+        max-width: 430px;
+        margin: 0 auto;
+        padding: 2.2rem 1.5rem 2.4rem;
+        text-align: center;
+        font-family: "Cormorant Garamond", serif;
+        font-weight: 500;
+        color: var(--azul);
+    }
+
+    .adorno {
+        display: block;
+        width: min(62%, 220px);
+        height: auto;
+        margin: 0 auto;
+        color: var(--dorado);
+    }
+
+    /* Las comillas grandes en Charm, la letra de los títulos */
+    .comillas {
+        margin-top: 0.6rem;
+        height: 1.6rem;
+        font-family: "Charm", cursive;
+        font-size: 3.6rem;
+        line-height: 1;
+        color: var(--dorado);
+    }
+
+    .texto {
+        max-width: 19rem;
+        margin: 0.4rem auto 0;
+        font-family: "Charm", cursive;
+        font-weight: 400;
+        font-size: clamp(1.25rem, 5.8vw, 1.45rem);
+        line-height: 1.6;
+    }
+
+    .cita {
+        margin-top: 1.3rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.8rem;
+        font-family: "Charm", cursive;
+        font-weight: 400;
+        font-size: clamp(1.05rem, 4.9vw, 1.22rem);
+        color: var(--dorado);
+    }
+
+    .raya {
+        display: block;
+        width: 1.8rem;
+        height: 1px;
+        background-color: var(--dorado);
+        opacity: 0.7;
+    }
+</style>
+
+<script>
+    import { entradaConjunta, gestos } from "../scripts/animaciones";
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const seccion = document.getElementById("versiculo");
+        if (!seccion) return;
+        const $ = (s: string) => seccion.querySelector(s);
+
+        // Todo a la vez: el adorno se abre, las comillas crecen, el
+        // versículo se escribe y la cita sube
+        entradaConjunta(seccion, [
+            [$(".adorno"), gestos.abrir],
+            [$(".comillas"), gestos.crecer],
+            [$(".texto"), gestos.trazo],
+            [$(".cita"), gestos.subir],
+        ]);
+    });
+</script>

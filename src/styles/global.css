@@ -1,0 +1,74 @@
+@import "tailwindcss";
+
+/* ═══════════════════════════════════════════════════════════
+   PALETA DE LA INVITACIÓN  (usar como bg-vino, text-marron...)
+   ═══════════════════════════════════════════════════════════ */
+@theme {
+  --color-vino: #861622;
+  --color-marron: #6a4925;
+  --color-crema: #f7f5f6;
+  --color-papel: #f5f3f2;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ICONOS PNG COLOREADOS (se pintan con máscara, no con filtros)
+   Uso: <span class="icono icono-marron" style="--ic:url('/iconos/cena.png')"></span>
+   ═══════════════════════════════════════════════════════════ */
+.icono {
+  display: inline-block;
+  -webkit-mask-image: var(--ic);
+  mask-image: var(--ic);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
+.icono-marron {
+  background-color: #6a4925;
+}
+
+.icono-crema {
+  background-color: #f7f5f6;
+}
+
+
+/*
+  Para el nombre de los novios: Great Vibes desde /fonts/ del propio sitio,
+  igual que Charm, para que los nombres no tarden en aparecer
+*/
+@font-face {
+  font-family: 'Great Vibes';
+  src: url('/fonts/GreatVibes-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+.font-great-vibes {
+  font-family: 'Great Vibes', cursive !important;
+}
+
+/* Para textos en mayúsculas finas */
+.font-cormorant {
+  font-family: 'Cormorant Garamond', serif !important;
+}
+
+/*
+  Charm, la de los títulos, desde /fonts/ del propio sitio: traída de Google
+  tarda dos viajes a internet y con señal regular el título aparece tarde.
+*/
+@font-face {
+  font-family: 'Charm';
+  src: url('/fonts/Charm-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+.font-charm {
+  font-weight: 400;
+  font-family: 'Charm', cursive !important;
+}

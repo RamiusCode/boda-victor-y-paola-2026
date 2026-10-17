@@ -1,0 +1,293 @@
+---
+// src/components/TarjetaLugar.astro
+// La tarjeta de un evento (ceremonia, recepción): título, ícono, lugar,
+// dirección, hora y botón al mapa, con un ramo azul asomando a cada costado
+// (lateral.png; el derecho espejado en su archivo). La usan
+// DireccionCeremonia, RecepcionDia1, CeremoniaCivil y RecepcionDia3, que
+// solo le pasan sus datos.
+//
+// Azul y dorado como el resto: tarjeta de papel con doble filo dorado y un
+// rombito arriba, título en Great Vibes dorado con el ícono dorado debajo,
+// lugar en Charm azul, hora con el reloj dorado y el botón azul con el filo
+// dorado.
+interface Props {
+    id: string;
+    titulo: string;
+    /** ícono de línea negro de /imagenes/; se pinta de dorado con máscara */
+    icono: string;
+    lugar: string;
+    direccion?: string;
+    hora: string;
+    enlaceMapa: string;
+    textoBoton?: string;
+}
+
+const {
+    id,
+    titulo,
+    icono,
+    lugar,
+    direccion,
+    hora,
+    enlaceMapa,
+    textoBoton = "Ver ubicación",
+} = Astro.props;
+---
+
+<section id={id} class="ceremonia">
+    <img
+        src="/imagenes/lateral-izq.png"
+        alt=""
+        width="300"
+        height="791"
+        class="lateral lateral-izq"
+        aria-hidden="true"
+    />
+    <img
+        src="/imagenes/lateral-der.png"
+        alt=""
+        width="300"
+        height="791"
+        class="lateral lateral-der"
+        aria-hidden="true"
+    />
+
+    <div class="tarjeta">
+        <h2 class="titulo font-great-vibes">{titulo}</h2>
+
+        <!-- El ícono, pintado de dorado con máscara (el archivo es negro) -->
+        <span
+            class="icono-lugar"
+            style={`--icono: url("/imagenes/${icono}")`}
+            aria-hidden="true"
+        ></span>
+
+        <p class="lugar font-charm">{lugar}</p>
+        {direccion && <p class="direccion">{direccion}</p>}
+
+        <p class="hora">
+            <!-- Reloj, en el mismo renglón que la hora -->
+            <svg
+                class="icono"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.3"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+            >
+                <circle cx="12" cy="12" r="8.5"></circle>
+                <path d="M12 7.2V12l3.2 2"></path>
+            </svg>
+            <span>{hora}</span>
+        </p>
+
+        <a
+            class="boton"
+            href={enlaceMapa}
+            target={enlaceMapa === "#" ? undefined : "_blank"}
+            rel="noopener noreferrer"
+        >
+            <!-- Pin de mapa, delante del texto -->
+            <svg
+                class="pin"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+            >
+                <path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"></path>
+                <circle cx="12" cy="10" r="2.3"></circle>
+            </svg>
+            <span>{textoBoton}</span>
+        </a>
+    </div>
+</section>
+
+<style>
+    .ceremonia {
+        --azul: #8e1426;
+        --dorado: #c6a24a;
+        --dorado-suave: rgba(198, 162, 74, 0.45);
+
+        position: relative;
+        z-index: 0;
+        width: 100%;
+        max-width: 430px;
+        margin: 0 auto;
+        /* Aire arriba y abajo: sin esto el bloque queda pegado a los vecinos */
+        padding-block: 2.8rem;
+        text-align: center;
+        font-family: "Cormorant Garamond", serif;
+        font-weight: 500;
+        color: var(--azul);
+    }
+
+    /*
+       Los ramos asoman por los costados de la tarjeta, desde el borde de
+       la pantalla y por detrás de ella (la tarjeta va en z-index 1).
+    */
+    .lateral {
+        position: absolute;
+        top: 50%;
+        z-index: 0;
+        width: 21%;
+        height: auto;
+        /* translate y no transform: la animación escribe su propio
+           transform y así no le pisa el centrado */
+        translate: 0 -50%;
+        pointer-events: none;
+    }
+
+    .lateral-izq {
+        left: 0;
+    }
+
+    .lateral-der {
+        right: 0;
+    }
+
+    /*
+       La tarjeta como las del contador y el calendario: papel de blanco a
+       marfil, filo dorado afuera y un hilo dorado tenue adentro.
+    */
+    .tarjeta {
+        position: relative;
+        z-index: 1;
+        margin: 0 1.9rem;
+        padding: 2rem 1.4rem 2.3rem;
+        border: 1px solid var(--dorado-suave);
+        border-radius: 16px;
+        background-color: rgba(253, 249, 241, 0.85);
+        box-shadow:
+            inset 0 0 0 4px rgba(255, 255, 255, 0.7),
+            inset 0 0 0 5px rgba(198, 162, 74, 0.22),
+            0 12px 28px rgba(142, 20, 38, 0.1);
+    }
+
+    /* Rombito dorado sobre el filo de arriba, al centro */
+    .tarjeta::before {
+        content: "";
+        position: absolute;
+        top: -5px;
+        left: 50%;
+        width: 9px;
+        height: 9px;
+        background-color: var(--dorado);
+        transform: translateX(-50%) rotate(45deg);
+    }
+
+    .titulo {
+        color: var(--dorado);
+        font-size: clamp(2.1rem, 10vw, 2.6rem);
+        line-height: 1.15;
+        font-weight: 400;
+        /* Great Vibes trae poco aire entre palabras */
+        word-spacing: 0.15em;
+    }
+
+    .icono-lugar {
+        display: block;
+        width: clamp(44px, 12vw, 54px);
+        height: clamp(44px, 12vw, 54px);
+        margin: 0.8rem auto 0;
+        background-color: var(--dorado);
+        -webkit-mask: var(--icono) center / contain no-repeat;
+        mask: var(--icono) center / contain no-repeat;
+    }
+
+    .lugar {
+        margin-top: 1.1rem;
+        font-size: clamp(1.35rem, 6.4vw, 1.65rem);
+        line-height: 1.35;
+    }
+
+    /* La calle, más chica y en cursiva: acompaña al nombre del lugar */
+    .direccion {
+        margin-top: 0.3rem;
+        font-size: clamp(1.2rem, 5.6vw, 1.35rem);
+        font-style: italic;
+        line-height: 1.45;
+        opacity: 0.85;
+    }
+
+    /* La hora con su reloj dorado, en el mismo renglón */
+    .hora {
+        margin-top: 0.9rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        font-size: clamp(1.2rem, 5.6vw, 1.45rem);
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        /* números parejos: en Cormorant algunos bajan de la línea */
+        font-variant-numeric: lining-nums;
+    }
+
+    .icono {
+        width: clamp(22px, 6vw, 26px);
+        height: clamp(22px, 6vw, 26px);
+        color: var(--dorado);
+    }
+
+    /*
+       Botón azul con un hilo dorado por dentro, en forma de píldora.
+       El pin de mapa va delante, en dorado claro.
+    */
+    .boton {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        margin-top: 1.6rem;
+        padding: 0.65rem 1.5rem;
+        border-radius: 999px;
+        background-color: var(--azul);
+        box-shadow:
+            inset 0 0 0 2px var(--azul),
+            inset 0 0 0 3px rgba(232, 205, 140, 0.75),
+            0 8px 18px rgba(142, 20, 38, 0.25);
+        color: #ffffff;
+        font-size: clamp(0.88rem, 4.1vw, 1rem);
+        font-weight: 600;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        text-decoration: none;
+    }
+
+    .pin {
+        width: 1.15em;
+        height: 1.15em;
+        color: #e8cd8c;
+    }
+</style>
+
+<script>
+    import { entradaConjunta, gestos } from "../scripts/animaciones";
+
+    document.addEventListener("DOMContentLoaded", () => {
+        // Puede haber varias tarjetas en la página: cada una se anima sola
+        document.querySelectorAll<HTMLElement>(".ceremonia").forEach((seccion) => {
+            const $ = (sel: string) => seccion.querySelector(sel);
+
+            // Todo a la vez: la tarjeta sube, los ramos crecen desde los
+            // bordes, el título se escribe, el ícono crece, el lugar y la
+            // dirección se cruzan, la hora baja y el botón se acerca
+            entradaConjunta(seccion, [
+                [$(".tarjeta"), gestos.subir],
+                [$(".lateral-izq"), gestos.ramo("izq")],
+                [$(".lateral-der"), gestos.ramo("der")],
+                [$(".titulo"), gestos.trazo],
+                [$(".icono-lugar"), gestos.crecer],
+                [$(".lugar"), gestos.desdeDerecha],
+                [$(".direccion"), gestos.desdeIzquierda],
+                [$(".hora"), gestos.bajar],
+                [$(".boton"), gestos.acercar],
+            ]);
+        });
+    });
+</script>

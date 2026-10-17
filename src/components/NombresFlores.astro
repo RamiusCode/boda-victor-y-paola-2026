@@ -1,0 +1,147 @@
+---
+// src/components/NombresFlores.astro
+// Foto de los novios a todo el ancho, cortada abajo como papel rasgado,
+// con un ramo azul en cada esquina de abajo, apoyado sobre el rasgado.
+//
+// El rasgado es solo una máscara que recorta la foto por una línea rota:
+// debajo se ve directamente el papel de fondo de la página, sin franja
+// blanca ni fibras encima.
+import { mascaraRasgada } from "../scripts/rasgado";
+
+// ── DATOS EDITABLES ───────────────────────────────────────────
+const altFoto = "Los novios";
+// ──────────────────────────────────────────────────────────────
+
+// El corte rasgado del pie de la foto (900 x 747), armado en
+// scripts/rasgado.ts, que comparte con Foto1
+const mascaraUrl = mascaraRasgada({ ancho: 900, alto: 1516, abajo: true });
+
+---
+
+<section class="seccion-novios">
+    <div class="foto-wrap">
+        <img
+            id="foto-novios"
+            src="/imagenes/foto2.jpg"
+            alt={altFoto}
+            width="900"
+            height="1516"
+            class="foto-novios"
+            style={`-webkit-mask-image: ${mascaraUrl}; mask-image: ${mascaraUrl};`}
+        />
+
+        <!--
+            El mismo ramo en las dos esquinas: florlateral2 trae las flores
+            pegadas a su borde izquierdo, así que la derecha va espejada en
+            su propio archivo (la animación borraría un volteo hecho con CSS)
+        -->
+        <img
+            id="flor-novios-izq"
+            src="/imagenes/florlateral2-izq.png"
+            alt=""
+            width="320"
+            height="549"
+            class="flor-novios flor-izq"
+            aria-hidden="true"
+        />
+        <img
+            id="flor-novios-der"
+            src="/imagenes/florlateral2-der.png"
+            alt=""
+            width="320"
+            height="549"
+            class="flor-novios flor-der"
+            aria-hidden="true"
+        />
+    </div>
+</section>
+
+<style>
+    .seccion-novios {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+    }
+
+    /* Columna móvil: la foto va a todo el ancho, sin márgenes */
+    .foto-wrap {
+        position: relative;
+        width: 100%;
+        max-width: 430px;
+    }
+
+    /* La máscara del rasgado llega inline desde el frontmatter */
+    .foto-novios {
+        display: block;
+        width: 100%;
+        height: auto;
+        -webkit-mask-size: 100% 100%;
+        mask-size: 100% 100%;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+    }
+
+    /*
+       Los ramos bajan un poco más allá del corte: así el rasgado termina
+       entre las flores y no en el borde de la pantalla.
+    */
+    .flor-novios {
+        position: absolute;
+        bottom: -11%;
+        width: 21%;
+        height: auto;
+        z-index: 1;
+        pointer-events: none;
+    }
+
+    .flor-izq {
+        left: 0;
+    }
+
+    .flor-der {
+        right: 0;
+    }
+</style>
+
+<script>
+    import { gsap } from "gsap";
+    import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+    gsap.registerPlugin(ScrollTrigger);
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const foto = document.getElementById("foto-novios");
+        const florIzq = document.getElementById("flor-novios-izq");
+        const florDer = document.getElementById("flor-novios-der");
+        if (!foto) return;
+
+        // La foto se acerca apenas al entrar y los ramos la siguen un poco
+        // después, para que no aparezcan como un bloque solo.
+        gsap.from(foto, {
+            scrollTrigger: { trigger: foto, start: "top 85%" },
+            opacity: 0,
+            scale: 1.04,
+            duration: 1.2,
+            ease: "power2.out",
+        });
+
+        // Cada ramo entra desde su propio borde
+        gsap.from(florIzq, {
+            scrollTrigger: { trigger: foto, start: "top 85%" },
+            opacity: 0,
+            x: -26,
+            duration: 1,
+            delay: 0.35,
+            ease: "power2.out",
+        });
+
+        gsap.from(florDer, {
+            scrollTrigger: { trigger: foto, start: "top 85%" },
+            opacity: 0,
+            x: 26,
+            duration: 1,
+            delay: 0.35,
+            ease: "power2.out",
+        });
+    });
+</script>

@@ -1,0 +1,173 @@
+---
+// src/components/Despedida.astro
+// Cierre de la invitación: el ramo azul de flor4 en las dos esquinas de
+// abajo, cada uno dado vuelta en su propio archivo para nacer de su
+// esquina. Arriba, la frase, el adorno, la firma de los novios en Great
+// Vibes y la fecha en dorado.
+//
+// La frase va escrita, no dentro de la imagen: así se lee nítida en
+// cualquier pantalla y se cambia sin volver a exportar nada.
+import Adorno from "./Adorno.astro";
+
+// ── DATOS EDITABLES ───────────────────────────────────────────
+const frase = "Tu presencia hará este día aún más inolvidable";
+const firma = "Con amor,";
+// Los mismos nombres y fecha que el bloque de la fecha (Fecha.astro)
+const novio = "Victor";
+const conector = "y";
+const novia = "Paola";
+const fecha = "12.12.26";
+// ──────────────────────────────────────────────────────────────
+---
+
+<section id="despedida" class="despedida">
+    <p class="frase font-charm">{frase}</p>
+
+    <Adorno class="adorno" />
+
+    <p class="firma font-charm">{firma}</p>
+
+    <h2 class="novios font-great-vibes">
+        <span class="nombre">{novio}</span>
+        <span class="conector">{conector}</span>
+        <span class="nombre">{novia}</span>
+    </h2>
+
+    <p class="fecha">{fecha}</p>
+
+    <img
+        src="/imagenes/flor4-abajo-izq.png"
+        alt=""
+        width="361"
+        height="394"
+        class="ramo ramo-izq"
+        aria-hidden="true"
+    />
+    <img
+        src="/imagenes/flor4-abajo.png"
+        alt=""
+        width="361"
+        height="394"
+        class="ramo ramo-der"
+        aria-hidden="true"
+    />
+</section>
+
+<style>
+    /*
+       z-index 0 arma la caja de apilado del bloque: así los ramos, que van
+       en -1, quedan encima del fondo pero detrás del texto. El padding de
+       abajo deja lugar a los ramos para que no tapen las letras.
+    */
+    .despedida {
+        --azul: #8e1426;
+        --dorado: #c6a24a;
+
+        position: relative;
+        z-index: 0;
+        width: 100%;
+        max-width: 430px;
+        margin: 0 auto;
+        padding: 2.8rem 1.5rem 9.5rem;
+        text-align: center;
+        color: var(--azul);
+    }
+
+    .ramo {
+        position: absolute;
+        z-index: -1;
+        width: 40%;
+        height: auto;
+        pointer-events: none;
+    }
+
+    .ramo-izq {
+        bottom: 0;
+        left: 0;
+    }
+
+    .ramo-der {
+        bottom: 0;
+        right: 0;
+    }
+
+    .frase {
+        max-width: 17rem;
+        margin: 0 auto;
+        font-size: clamp(1.3rem, 6.2vw, 1.55rem);
+        line-height: 1.45;
+    }
+
+    .adorno {
+        display: block;
+        width: min(58%, 210px);
+        height: auto;
+        margin: 1.4rem auto 0;
+        color: var(--dorado);
+    }
+
+    .firma {
+        margin-top: 1.2rem;
+        color: var(--dorado);
+        font-size: clamp(1.15rem, 5.4vw, 1.35rem);
+    }
+
+    .novios {
+        margin-top: 0.2rem;
+        font-size: clamp(2.6rem, 12.5vw, 3.3rem);
+        line-height: 1.12;
+        font-weight: 400;
+        /* Great Vibes trae poco aire entre palabras: un nombre compuesto se pega */
+        word-spacing: 0.15em;
+    }
+
+    .nombre {
+        display: block;
+    }
+
+    /* La "y" va sola, más chica y en dorado, como en el bloque de la fecha */
+    .conector {
+        display: block;
+        /* más aire abajo: la cola de la "y" baja y la mayúscula de abajo sube */
+        margin: -0.35em 0 0.55em;
+        font-size: 0.55em;
+        line-height: 1;
+        color: var(--dorado);
+    }
+
+    .fecha {
+        margin-top: 1rem;
+        color: var(--dorado);
+        font-family: "Cormorant Garamond", serif;
+        font-size: clamp(1.15rem, 5.4vw, 1.35rem);
+        font-weight: 600;
+        letter-spacing: 0.3em;
+        /* compensa el hueco que el tracking deja después del último signo */
+        text-indent: 0.3em;
+        /* dígitos parejos: en Cormorant algunos bajan de la línea */
+        font-variant-numeric: lining-nums;
+    }
+</style>
+
+<script>
+    import { entradaConjunta, gestos } from "../scripts/animaciones";
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const seccion = document.getElementById("despedida");
+        if (!seccion) return;
+        const $ = (sel: string) => seccion.querySelector(sel);
+
+        // Todo a la vez: la frase baja, el adorno se abre, la firma llega
+        // desde la izquierda, los nombres se acercan, la fecha sube y los
+        // ramos crecen desde sus esquinas de abajo
+        entradaConjunta(seccion, [
+            [$(".frase"), gestos.bajar],
+            [$(".adorno"), gestos.abrir],
+            [$(".firma"), gestos.desdeIzquierda],
+            [$(".novios"), gestos.acercar],
+            [$(".fecha"), gestos.subir],
+            [$(".ramo-izq"), gestos.ramo("izq", "bottom")],
+            [$(".ramo-der"), gestos.ramo("der", "bottom")],
+        ]);
+    });
+</script>

@@ -1,0 +1,126 @@
+---
+// src/components/SugerenciaRegalos.astro
+// Sugerencia de regalo, suelta sobre el papel y sin marco: el sobre azul,
+// el título dorado en Great Vibes, el adorno, la etiqueta y la nota en
+// Charm, y el ramo azul cerrando abajo.
+import Adorno from "./Adorno.astro";
+
+// ── DATOS EDITABLES ───────────────────────────────────────────
+const titulo = "Sugerencia de regalo";
+const etiqueta = "Lluvia de Sobres";
+
+const nota =
+    "El mejor regalo es tenerte con nosotros en este día tan esperado. Y si además deseas hacernos un obsequio, el día de la boda encontrarás sobres a tu disposición para dejarlo con todo cariño.";
+
+// ──────────────────────────────────────────────────────────────
+---
+
+<section id="regalos" class="regalos">
+    <!-- Sobre con moño: se pinta con máscara, el color va en el fondo -->
+    <span
+        class="icono icono-azul"
+        style="--ic: url('/imagenes/lluvia-sobre.png')"
+        aria-hidden="true"></span>
+
+    <h2 class="titulo font-great-vibes">{titulo}</h2>
+    <Adorno class="adorno" />
+
+    <p class="etiqueta font-charm">{etiqueta}</p>
+
+    <p class="nota font-charm">{nota}</p>
+
+    <img
+        src="/imagenes/florseparador.png"
+        alt=""
+        width="482"
+        height="275"
+        class="rama"
+        aria-hidden="true"
+    />
+</section>
+
+<style>
+    .regalos {
+        --azul: #8e1426;
+        --dorado: #c6a24a;
+
+        width: 100%;
+        max-width: 430px;
+        margin: 0 auto;
+        padding: 2.6rem 1.5rem;
+        text-align: center;
+        color: var(--azul);
+    }
+
+    .icono {
+        display: block;
+        width: clamp(42px, 11vw, 50px);
+        height: clamp(42px, 11vw, 50px);
+        margin: 0 auto;
+    }
+
+    .icono-azul {
+        background-color: var(--azul);
+    }
+
+    .titulo {
+        margin-top: 0.6rem;
+        color: var(--dorado);
+        font-size: clamp(2.3rem, 11vw, 2.9rem);
+        line-height: 1.2;
+        font-weight: 400;
+        /* Great Vibes trae poco aire entre palabras */
+        word-spacing: 0.15em;
+    }
+
+    .adorno {
+        display: block;
+        width: min(58%, 210px);
+        height: auto;
+        margin: 0.4rem auto 0;
+        color: var(--dorado);
+    }
+
+    .etiqueta {
+        margin-top: 0.9rem;
+        font-size: clamp(1.7rem, 8vw, 2.1rem);
+        line-height: 1.25;
+    }
+
+    .nota {
+        max-width: 18rem;
+        margin: 0.8rem auto 0;
+        font-size: clamp(1.25rem, 5.8vw, 1.45rem);
+        line-height: 1.55;
+    }
+
+    .rama {
+        display: block;
+        width: 48%;
+        height: auto;
+        margin: 1.6rem auto 0;
+    }
+</style>
+
+<script>
+    import { entradaConjunta, gestos } from "../scripts/animaciones";
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const seccion = document.getElementById("regalos");
+        if (!seccion) return;
+        const $ = (sel: string) => seccion.querySelector(sel);
+
+        // Arriba, todo a la vez: el sobre crece, el título se escribe, el
+        // adorno se abre, la etiqueta llega desde la derecha y la nota sube
+        entradaConjunta(seccion, [
+            [$(".icono"), gestos.crecer],
+            [$(".titulo"), gestos.trazo],
+            [$(".adorno"), gestos.abrir],
+            [$(".etiqueta"), gestos.desdeDerecha],
+            [$(".nota"), gestos.subir],
+        ]);
+
+        // El ramo de abajo crece cuando asoma
+        entradaConjunta($(".rama"), [[$(".rama"), gestos.crecer]]);
+    });
+</script>

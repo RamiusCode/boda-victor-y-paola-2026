@@ -1,0 +1,131 @@
+---
+// src/components/Pase.astro
+// Los pases reservados: el ticket azul, el número dorado dentro de un
+// círculo de doble filo dorado y el pie en Great Vibes. Sin marcos.
+//
+// El número llega desde la página: las personalizadas (/[slug]) lo pasan
+// según lista.txt. La genérica (/) no lo pasa, así que cae en 1 y el
+// bloque se dibuja igual.
+interface Props {
+    pases?: number;
+}
+
+const { pases = 1 } = Astro.props;
+
+/*
+   La frase del pie se arma en un solo lugar: repartida en varios archivos,
+   el singular y el plural se desincronizan en cuanto se retoca uno.
+*/
+const piePorPases = (cantidad: number) =>
+    cantidad === 1 ? "Pase para ti" : "Pases para ti";
+
+// ── DATOS EDITABLES ───────────────────────────────────────────
+const intro = ["Con mucho cariño hemos", "reservado"];
+// ──────────────────────────────────────────────────────────────
+---
+
+<section id="pase" class="pase">
+    <span
+        class="icono icono-azul ticket"
+        style="--ic: url('/imagenes/reserva.png')"
+        aria-hidden="true"></span>
+
+    <p class="intro font-charm">{intro.join(" ")}</p>
+
+    <div class="circulo">
+        <span class="numero">{pases}</span>
+    </div>
+
+    <p class="pie font-great-vibes">{piePorPases(pases)}</p>
+</section>
+
+<style>
+    .pase {
+        --azul: #8e1426;
+        --dorado: #c6a24a;
+
+        width: 100%;
+        max-width: 430px;
+        margin: 0 auto;
+        padding: 2.6rem 1.5rem 2rem;
+        text-align: center;
+        color: var(--azul);
+    }
+
+    /* El ticket se pinta con máscara: el color va en el fondo */
+    .ticket {
+        display: block;
+        width: clamp(40px, 11vw, 48px);
+        height: clamp(40px, 11vw, 48px);
+        margin: 0 auto;
+    }
+
+    .icono-azul {
+        background-color: var(--azul);
+    }
+
+    .intro {
+        max-width: 16rem;
+        margin: 0.8rem auto 0;
+        font-size: clamp(1.25rem, 5.8vw, 1.45rem);
+        line-height: 1.45;
+    }
+
+    /*
+       El número en un círculo de papel con doble filo dorado y una sombra
+       corta y clara, como los medallones del resto de la invitación.
+    */
+    .circulo {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: clamp(92px, 26vw, 110px);
+        height: clamp(92px, 26vw, 110px);
+        margin: 1.2rem auto 0;
+        border: 1px solid rgba(198, 162, 74, 0.6);
+        border-radius: 50%;
+        background-color: #fdf9f1;
+        box-shadow:
+            inset 0 0 0 5px #ffffff,
+            inset 0 0 0 6px rgba(198, 162, 74, 0.35),
+            0 6px 16px rgba(142, 20, 38, 0.12);
+    }
+
+    .numero {
+        color: var(--dorado);
+        font-family: "Cormorant Garamond", serif;
+        font-size: clamp(2.8rem, 13vw, 3.4rem);
+        font-weight: 600;
+        line-height: 1;
+        /* números parejos: en Cormorant algunos bajan de la línea */
+        font-variant-numeric: lining-nums;
+    }
+
+    .pie {
+        margin-top: 0.8rem;
+        color: var(--dorado);
+        font-size: clamp(2.1rem, 10vw, 2.6rem);
+        line-height: 1.2;
+        /* Great Vibes trae poco aire entre palabras */
+        word-spacing: 0.15em;
+    }
+</style>
+
+<script>
+    import { entradaConjunta, gestos } from "../scripts/animaciones";
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const seccion = document.getElementById("pase");
+        if (!seccion) return;
+        const $ = (sel: string) => seccion.querySelector(sel);
+
+        // Todo a la vez: el ticket crece, el texto baja, el círculo con el
+        // número se acerca y el pie se escribe
+        entradaConjunta(seccion, [
+            [$(".ticket"), gestos.crecer],
+            [$(".intro"), gestos.bajar],
+            [$(".circulo"), gestos.acercar],
+            [$(".pie"), gestos.trazo],
+        ]);
+    });
+</script>

@@ -1,0 +1,523 @@
+---
+// src/components/Fecha.astro
+// El bloque de la fecha: anuncio, nombres, fecha, cuenta regresiva y el
+// calendario del mes con el día marcado.
+//
+// La cuenta regresiva usa ids propios (f-dias, f-horas...) y no los de
+// Contador.astro: si los dos bloques estuvieran en la misma página, ids
+// repetidos harían que el reloj escriba siempre en el primero.
+import Adorno from "./Adorno.astro";
+
+// ── DATOS EDITABLES ───────────────────────────────────────────
+const anuncio = "¡Nos Casamos!";
+// Los nombres van en tres renglones, con la "y" sola en el medio: en una
+// sola línea, dos nombres largos entran tan chicos que la cursiva
+// pierde los trazos finos.
+const novio = "Victor";
+const conector = "y";
+const novia = "Paola";
+const fecha = "12.12.26";
+const tituloCuenta = "Solo faltan...";
+
+// Fecha y hora de la boda (año, mes, día, hora, minuto)
+const fechaBoda = "2026-12-12T13:00:00";
+
+const mes = "Diciembre";
+const anio = 2026;
+const mesIndice = 11; // 0 = enero ... 11 = diciembre
+// Los días de celebración, cada uno marcado con su corazón en el calendario
+const diasBoda = [12, 13, 14];
+// ──────────────────────────────────────────────────────────────
+
+const casillas = [
+    { id: "f-dias", rotulo: "Días" },
+    { id: "f-horas", rotulo: "Horas" },
+    { id: "f-minutos", rotulo: "Minutos" },
+    { id: "f-segundos", rotulo: "Segundos" },
+];
+
+// La semana arranca en lunes, como en el diseño: getDay() devuelve 0 para
+// el domingo, así que se corre un lugar.
+const cabeceras = ["L", "M", "M", "J", "V", "S", "D"];
+const primerDia = (new Date(anio, mesIndice, 1).getDay() + 6) % 7;
+const diasDelMes = new Date(anio, mesIndice + 1, 0).getDate();
+
+const celdas: (number | null)[] = [
+    ...Array(primerDia).fill(null),
+    ...Array.from({ length: diasDelMes }, (_, i) => i + 1),
+];
+while (celdas.length % 7 !== 0) celdas.push(null);
+---
+
+<section id="bloque-fecha" class="bloque-fecha">
+    <p class="anuncio">
+        <span class="raya" aria-hidden="true"></span>
+        {anuncio}
+        <span class="raya" aria-hidden="true"></span>
+    </p>
+
+    <!--
+        Los nombres entre dos ramos azules, uno por lado, entrando desde los
+        bordes de la pantalla. El de la derecha va espejado en su archivo.
+    -->
+    <div class="novios-marco">
+        <img
+            src="/imagenes/lateral-izq.png"
+            alt=""
+            width="300"
+            height="791"
+            class="flor-lateral flor-lateral-izq"
+            aria-hidden="true"
+        />
+        <img
+            src="/imagenes/lateral-der.png"
+            alt=""
+            width="300"
+            height="791"
+            class="flor-lateral flor-lateral-der"
+            aria-hidden="true"
+        />
+
+        <h2 class="novios font-great-vibes">
+            <span class="nombre">{novio}</span>
+            <span class="conector">{conector}</span>
+            <span class="nombre">{novia}</span>
+        </h2>
+    </div>
+
+    <!-- Adorno dorado, el mismo del versículo y la portada -->
+    <Adorno class="adorno" />
+
+    <p class="fecha">{fecha}</p>
+
+    <p class="titulo-cuenta">{tituloCuenta}</p>
+
+    <!-- CUENTA REGRESIVA -->
+    <div id="cuenta" class="cuenta" data-fecha={fechaBoda}>
+        {
+            casillas.map((casilla) => (
+                <div class="unidad">
+                    <span id={casilla.id} class="numero">
+                        00
+                    </span>
+                    <span class="rotulo">{casilla.rotulo}</span>
+                </div>
+            ))
+        }
+    </div>
+
+    <!-- CALENDARIO -->
+    <div id="calendario" class="calendario">
+        <div class="calendario-cabecera">
+            <span class="mes font-charm">{mes}</span>
+            <span class="anio font-charm">{anio}</span>
+        </div>
+
+        <div class="grilla">
+            {cabeceras.map((letra) => <span class="dia-letra">{letra}</span>)}
+            {
+                celdas.map((dia) => (
+                    <span class={`dia ${dia !== null && diasBoda.includes(dia) ? "dia-boda" : ""}`}>
+                        {dia !== null && diasBoda.includes(dia) && (
+                            <svg
+                                class="corazon"
+                                viewBox="0 0 24 24"
+                                fill="rgba(198, 162, 74, 0.14)"
+                                stroke="#c6a24a"
+                                stroke-width="1.5"
+                                aria-hidden="true"
+                            >
+                                <path d="M12 21s-7.5-4.7-9.3-9A5.3 5.3 0 0 1 12 6.5 5.3 5.3 0 0 1 21.3 12c-1.8 4.3-9.3 9-9.3 9z" />
+                            </svg>
+                        )}
+                        <span class="dia-numero">{dia ?? ""}</span>
+                    </span>
+                ))
+            }
+        </div>
+    </div>
+
+    <!-- Separador floral, centrado debajo del calendario -->
+    <img
+        id="separador"
+        src="/imagenes/florseparador.png"
+        alt=""
+        width="1065"
+        height="378"
+        class="separador"
+        aria-hidden="true"
+    />
+</section>
+
+<style>
+    /*
+       z-index 0 arma la caja de apilado del bloque: así los ramos de los nombres, que van en
+       -1, quedan encima del fondo pero debajo del texto sin irse detrás de
+       la página entera.
+    */
+    .bloque-fecha {
+        --azul: #8e1426;
+        --dorado: #c6a24a;
+        /* dorado translúcido para bordes y fondos de las tarjetas */
+        --dorado-suave: rgba(198, 162, 74, 0.45);
+        --papel: rgba(255, 255, 255, 0.55);
+
+        position: relative;
+        z-index: 0;
+        width: 100%;
+        max-width: 430px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem 2.2rem;
+        text-align: center;
+        font-family: "Cormorant Garamond", serif;
+        font-weight: 500;
+        color: var(--azul);
+    }
+
+    /*
+       Los textos chicos del bloque van en Charm, la letra de los títulos.
+       Sin mayúsculas forzadas ni espaciado: esa letra no los tolera.
+       Los números grandes de la cuenta siguen en Cormorant.
+    */
+    .anuncio,
+    .fecha,
+    .titulo-cuenta,
+    .rotulo,
+    .dia-letra,
+    .dia {
+        font-family: "Charm", cursive;
+        font-weight: 400;
+    }
+
+    /* "¡Nos casamos!" en dorado, entre dos rayas finas */
+    .anuncio {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.8rem;
+        color: var(--dorado);
+        font-size: clamp(1.15rem, 5.3vw, 1.35rem);
+    }
+
+    .raya {
+        display: block;
+        width: 1.8rem;
+        height: 1px;
+        background-color: var(--dorado);
+        opacity: 0.7;
+    }
+
+    /*
+       El marco ocupa el ancho del texto; los ramos se salen 1.5rem, lo que
+       mide el padding del bloque, para llegar al borde de la pantalla.
+       Van detrás de los nombres (z-index -1 dentro del bloque).
+    */
+    .novios-marco {
+        position: relative;
+        margin-top: 0.9rem;
+    }
+
+    .flor-lateral {
+        position: absolute;
+        top: 50%;
+        z-index: -1;
+        width: 20%;
+        height: auto;
+        /* translate y no transform: la animación escribe su propio
+           transform y así no le pisa el centrado */
+        translate: 0 -50%;
+        pointer-events: none;
+    }
+
+    .flor-lateral-izq {
+        left: -1.5rem;
+    }
+
+    .flor-lateral-der {
+        right: -1.5rem;
+    }
+
+    .novios {
+        /* Great Vibes trae poco aire entre palabras: un nombre compuesto se pega */
+        word-spacing: 0.15em;
+        font-size: clamp(2.4rem, 11.5vw, 3.1rem);
+        line-height: 1.15;
+        font-weight: 400;
+    }
+
+    .nombre {
+        display: block;
+    }
+
+    /* La "y" va sola, más chica y en dorado: une sin competir */
+    .conector {
+        display: block;
+        margin: 0.1em 0;
+        font-size: 0.55em;
+        line-height: 1;
+        color: var(--dorado);
+    }
+
+    .adorno {
+        display: block;
+        width: min(58%, 210px);
+        height: auto;
+        margin: 1rem auto 0;
+        color: var(--dorado);
+    }
+
+    .fecha {
+        margin-top: 0.8rem;
+        color: var(--dorado);
+        font-size: clamp(1.25rem, 5.8vw, 1.5rem);
+        /* aire entre los dígitos; el text-indent compensa el último */
+        letter-spacing: 0.12em;
+        text-indent: 0.12em;
+    }
+
+    /* Un poco más chico que el mes del calendario: es el título de la cuenta */
+    .titulo-cuenta {
+        margin-top: 2.4rem;
+        font-size: clamp(1.3rem, 6vw, 1.55rem);
+        line-height: 1.2;
+    }
+
+    .cuenta {
+        position: relative;
+        margin-top: 1rem;
+        display: flex;
+        align-items: stretch;
+        justify-content: center;
+        gap: clamp(0.35rem, 1.8vw, 0.55rem);
+    }
+
+    /*
+       Cada número en su tarjetita: papel translúcido con filo dorado.
+       Ancho fijo para que no bailen cuando cambian los dígitos.
+    */
+    /*
+       Doble filo: el borde dorado de afuera y un hilo dorado más tenue
+       adentro, separados por un margen de papel, como una tarjeta impresa.
+       El papel baja de blanco a marfil para que no se vea plano.
+    */
+    .unidad {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: clamp(66px, 19vw, 80px);
+        padding: 0.65rem 0 0.7rem;
+        border: 1px solid var(--dorado-suave);
+        border-radius: 14px;
+        background-color: rgba(253, 249, 241, 0.8);
+        box-shadow:
+            inset 0 0 0 3px rgba(255, 255, 255, 0.7),
+            inset 0 0 0 4px rgba(198, 162, 74, 0.22),
+            0 8px 18px rgba(142, 20, 38, 0.08);
+    }
+
+    /* Rombito dorado sobre el filo de arriba, al centro */
+    .unidad::before {
+        content: "";
+        position: absolute;
+        top: -4px;
+        left: 50%;
+        width: 7px;
+        height: 7px;
+        background-color: var(--dorado);
+        transform: translateX(-50%) rotate(45deg);
+    }
+
+    .numero {
+        color: var(--azul);
+        font-size: clamp(1.65rem, 8vw, 2.1rem);
+        font-weight: 600;
+        line-height: 1.1;
+        /* números de igual alto y ancho, sin los descendentes de Cormorant */
+        font-variant-numeric: lining-nums tabular-nums;
+    }
+
+    /* Una rayita dorada separa el número de su nombre */
+    .rotulo {
+        position: relative;
+        color: var(--dorado);
+        margin-top: 0.55rem;
+        padding-top: 0.4rem;
+        font-size: clamp(0.78rem, 3.6vw, 0.9rem);
+        line-height: 1.2;
+    }
+
+    .rotulo::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 50%;
+        width: 18px;
+        height: 1px;
+        background-color: var(--dorado);
+        opacity: 0.6;
+        transform: translateX(-50%);
+    }
+
+    .separador {
+        display: block;
+        width: 62%;
+        max-width: 240px;
+        height: auto;
+        margin: 1.6rem auto 0;
+    }
+
+    /* El calendario en una tarjeta como las de la cuenta, más grande */
+    .calendario {
+        width: 100%;
+        max-width: 320px;
+        margin: 2.8rem auto 0;
+        padding: 1.1rem 1rem 1.3rem;
+        border: 1px solid var(--dorado-suave);
+        border-radius: 16px;
+        background-color: var(--papel);
+        box-shadow: 0 10px 26px rgba(142, 20, 38, 0.08);
+    }
+
+    /* El mes en azul y el año en dorado, separados del día por un filo */
+    .calendario-cabecera {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        padding: 0 0.4rem 0.6rem;
+        margin-bottom: 0.9rem;
+        border-bottom: 1px solid var(--dorado-suave);
+    }
+
+    .mes,
+    .anio {
+        font-size: clamp(1.5rem, 7.2vw, 1.85rem);
+        line-height: 1.2;
+    }
+
+    .anio {
+        color: var(--dorado);
+    }
+
+    .grilla {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        row-gap: 0.75rem;
+        text-align: center;
+    }
+
+    .dia-letra {
+        color: var(--dorado);
+        font-size: clamp(0.85rem, 4vw, 1rem);
+        padding-bottom: 0.35rem;
+    }
+
+    .dia {
+        position: relative;
+        font-size: clamp(0.82rem, 4vw, 0.98rem);
+        line-height: 1.5;
+    }
+
+    /* El día de la boda va en dorado, dentro del corazón */
+    .dia-boda .dia-numero {
+        color: var(--dorado);
+    }
+
+    .corazon {
+        position: absolute;
+        inset: 0;
+        margin: auto;
+        width: clamp(24px, 7.6vw, 30px);
+        height: clamp(24px, 7.6vw, 30px);
+        transform: translateY(-1px);
+    }
+
+    .dia-numero {
+        position: relative;
+    }
+</style>
+
+<script>
+    import { gsap } from "gsap";
+    import { entradaConjunta, gestos } from "../scripts/animaciones";
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const bloque = document.getElementById("bloque-fecha");
+        if (!bloque) return;
+
+        const $ = (sel: string) => bloque.querySelector(sel);
+
+        // Tres partes, cada una entra al asomar con todo a la vez.
+        // Los nombres: el anuncio baja, los nombres se acercan, los ramos
+        // crecen desde los bordes, el adorno se abre y la fecha sube.
+        entradaConjunta(bloque, [
+            [$(".anuncio"), gestos.bajar],
+            [$(".novios"), gestos.acercar],
+            [$(".flor-lateral-izq"), gestos.ramo("izq")],
+            [$(".flor-lateral-der"), gestos.ramo("der")],
+            [$(".adorno"), gestos.abrir],
+            [$(".fecha"), gestos.subir],
+        ]);
+
+        // La cuenta: el título se escribe y cada número llega de un lado
+        const [dias, horas, minutos, segundos] = bloque.querySelectorAll(".unidad");
+        entradaConjunta($(".titulo-cuenta"), [
+            [$(".titulo-cuenta"), gestos.trazo],
+            [dias, gestos.desdeIzquierda],
+            [horas, gestos.bajar],
+            [minutos, gestos.subir],
+            [segundos, gestos.desdeDerecha],
+        ]);
+
+        // El calendario se acerca y el ramo de abajo crece
+        entradaConjunta($(".calendario"), [
+            [$(".calendario"), gestos.acercar],
+            [$(".separador"), gestos.crecer],
+        ]);
+
+        // ── Cuenta regresiva ────────────────────────────────────
+        const cuenta = document.getElementById("cuenta");
+        if (!cuenta) return;
+
+        const objetivo = new Date(cuenta.dataset.fecha as string).getTime();
+        const el = (id: string) => document.getElementById(id);
+
+        // Cuando un número cambia, el nuevo cae suave desde arriba en vez
+        // de saltar. Solo se anima el que cambió: los demás quedan quietos.
+        const sinMovimiento = window.matchMedia(
+            "(prefers-reduced-motion: reduce)",
+        ).matches;
+        let primeraVez = true;
+        const poner = (nodo: HTMLElement | null, valor: string) => {
+            if (!nodo || nodo.textContent === valor) return;
+            nodo.textContent = valor;
+            if (primeraVez || sinMovimiento) return;
+            gsap.fromTo(
+                nodo,
+                { y: -8, opacity: 0.2 },
+                { y: 0, opacity: 1, duration: 0.45, ease: "power2.out" },
+            );
+        };
+
+        const pintar = () => {
+            const resta = Math.max(objetivo - Date.now(), 0);
+            const seg = Math.floor(resta / 1000);
+
+            const dias = Math.floor(seg / 86400);
+            const horas = Math.floor((seg % 86400) / 3600);
+            const minutos = Math.floor((seg % 3600) / 60);
+            const segundos = seg % 60;
+
+            const dosDigitos = (n: number) => n.toString().padStart(2, "0");
+
+            poner(el("f-dias"), dias.toString());
+            poner(el("f-horas"), dosDigitos(horas));
+            poner(el("f-minutos"), dosDigitos(minutos));
+            poner(el("f-segundos"), dosDigitos(segundos));
+        };
+
+        pintar();
+        primeraVez = false;
+        setInterval(pintar, 1000);
+    });
+</script>

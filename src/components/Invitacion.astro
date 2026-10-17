@@ -1,0 +1,94 @@
+---
+// src/components/Invitacion.astro
+// El cuerpo completo de la invitación, en un solo lugar.
+//
+// Lo usa la página (index.astro). Si más adelante se agregan las
+// personalizadas, usan esta misma pieza para que no existan dos copias que
+// se vayan desincronizando a medida que se retoca el diseño.
+//
+// Sin `invitado` no se dibuja el nombre en la portada; sin `pases` el
+// bloque de pases muestra 1.
+import Portada from "./Portada.astro";
+import Versiculo from "./Versiculo.astro";
+import NombresPadres from "./NombresPadres.astro";
+import NombresFlores from "./NombresFlores.astro";
+import Fecha from "./Fecha.astro";
+import Foto1 from "./Foto1.astro";
+import Foto2 from "./Foto2.astro";
+import Foto3 from "./Foto3.astro";
+import DireccionCeremonia from "./DireccionCeremonia.astro";
+import DiaEvento from "./DiaEvento.astro";
+import RecepcionDia1 from "./RecepcionDia1.astro";
+import Cronograma from "./Cronograma.astro";
+import CeremoniaCivil from "./CeremoniaCivil.astro";
+import RecepcionDia3 from "./RecepcionDia3.astro";
+import CodigoVestimenta from "./CodigoVestimenta.astro";
+import Pase from "./Pase.astro";
+import Restriccion from "./Restriccion.astro";
+import ConfirmarAsistencia from "./ConfirmarAsistencia.astro";
+import SugerenciaRegalos from "./SugerenciaRegalos.astro";
+import Despedida from "./Despedida.astro";
+import BotonMusica from "./BotonMusica.astro";
+
+interface Props {
+    invitado?: string;
+    pases?: number;
+}
+
+const { invitado, pases } = Astro.props;
+---
+
+<!-- PORTADA (cubre todo hasta que se toca el sobre) -->
+<Portada invitado={invitado} />
+
+<!-- CONTENIDO DE LA INVITACIÓN -->
+<div id="contenido-principal">
+    <NombresFlores />
+    <Versiculo />
+    <Fecha />
+    <Foto1 />
+    <NombresPadres />
+    <!-- <Foto2 /> -->
+    <!-- Tres días de celebración: la cabecera de cada día y sus tarjetas -->
+    <DiaEvento
+        id="dia-1"
+        orden="Primer día"
+        semana="Sábado"
+        numero={12}
+        mes="Diciembre"
+        resumen="Ceremonia religiosa y recepción"
+    />
+    <DireccionCeremonia />
+    <RecepcionDia1 />
+    <Cronograma />
+
+    <DiaEvento
+        id="dia-2"
+        orden="Segundo día"
+        semana="Domingo"
+        numero={13}
+        mes="Diciembre"
+        resumen="Ceremonia civil y recepción"
+    />
+    <CeremoniaCivil />
+
+    <DiaEvento
+        id="dia-3"
+        orden="Tercer día"
+        semana="Lunes"
+        numero={14}
+        mes="Diciembre"
+        resumen="Recepción"
+    />
+    <RecepcionDia3 />
+    <Foto3 />
+    <CodigoVestimenta />
+    <!-- <Pase pases={pases} /> -->
+    <!-- <Restriccion /> -->
+    <ConfirmarAsistencia />
+    <!-- <SugerenciaRegalos /> -->
+    <Despedida />
+</div>
+
+<!-- Control de música flotante -->
+<BotonMusica />

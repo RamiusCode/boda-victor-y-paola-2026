@@ -1,0 +1,26 @@
+---
+// src/components/RecepcionDia3.astro
+// La recepción del tercer día, en un domicilio particular: solo los datos.
+// El diseño está en TarjetaLugar.
+import TarjetaLugar from "./TarjetaLugar.astro";
+
+// ── DATOS EDITABLES ───────────────────────────────────────────
+const titulo = "Recepción";
+const lugar = "Domicilio particular";
+const direccion = "Av. Blanco Galindo Km 6 1/2, Urbanización Avaroa, tras la empresa SACI";
+const hora = "15:00 hrs.";
+const enlaceMapa = "https://maps.app.goo.gl/wuLuXqcVJhrWZwcT9";
+const textoBoton = "Ver ubicación";
+// ──────────────────────────────────────────────────────────────
+---
+
+<TarjetaLugar
+    id="recepcion-dia-3"
+    titulo={titulo}
+    icono="domicilio.png"
+    lugar={lugar}
+    direccion={direccion}
+    hora={hora}
+    enlaceMapa={enlaceMapa}
+    textoBoton={textoBoton}
+/>

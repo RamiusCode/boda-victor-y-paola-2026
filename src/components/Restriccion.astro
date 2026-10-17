@@ -1,0 +1,93 @@
+---
+// src/components/Restriccion.astro
+// Solo adultos: el ramo azul arriba, el título dorado en Great Vibes, el
+// adorno y la nota en Charm azul. Sin marco.
+import Adorno from "./Adorno.astro";
+
+// ── DATOS EDITABLES ───────────────────────────────────────────
+const titulo = "Solo Adultos";
+const nota =
+    "Su presencia es el mejor regalo, la de los pequeños esta vez, será en nuestros corazones";
+// ──────────────────────────────────────────────────────────────
+---
+
+<section id="restriccion" class="restriccion">
+    <img
+        src="/imagenes/florseparador.png"
+        alt=""
+        width="482"
+        height="275"
+        class="rama"
+        aria-hidden="true"
+    />
+
+    <h2 class="titulo font-great-vibes">{titulo}</h2>
+    <Adorno class="adorno" />
+
+    <p class="nota font-charm">{nota}</p>
+</section>
+
+<style>
+    .restriccion {
+        --azul: #8e1426;
+        --dorado: #c6a24a;
+
+        width: 100%;
+        max-width: 430px;
+        margin: 0 auto;
+        padding: 1.6rem 1.5rem 2.6rem;
+        text-align: center;
+        color: var(--azul);
+    }
+
+    .rama {
+        display: block;
+        width: 52%;
+        height: auto;
+        margin: 0 auto;
+    }
+
+    .titulo {
+        margin-top: 1.4rem;
+        color: var(--dorado);
+        font-size: clamp(2.5rem, 12vw, 3.1rem);
+        line-height: 1.2;
+        font-weight: 400;
+        /* Great Vibes trae poco aire entre palabras */
+        word-spacing: 0.15em;
+    }
+
+    .adorno {
+        display: block;
+        width: min(58%, 210px);
+        height: auto;
+        margin: 0.4rem auto 0;
+        color: var(--dorado);
+    }
+
+    .nota {
+        max-width: 18rem;
+        margin: 1rem auto 0;
+        font-size: clamp(1.25rem, 5.8vw, 1.45rem);
+        line-height: 1.55;
+    }
+</style>
+
+<script>
+    import { entradaConjunta, gestos } from "../scripts/animaciones";
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const seccion = document.getElementById("restriccion");
+        if (!seccion) return;
+        const $ = (sel: string) => seccion.querySelector(sel);
+
+        // Todo a la vez: el ramo crece, el título se escribe, el adorno se
+        // abre y la nota sube
+        entradaConjunta(seccion, [
+            [$(".rama"), gestos.crecer],
+            [$(".titulo"), gestos.trazo],
+            [$(".adorno"), gestos.abrir],
+            [$(".nota"), gestos.subir],
+        ]);
+    });
+</script>

@@ -1,0 +1,26 @@
+---
+// src/components/RecepcionDia1.astro
+// La recepción del primer día, después de la ceremonia religiosa: solo los
+// datos. El diseño está en TarjetaLugar.
+import TarjetaLugar from "./TarjetaLugar.astro";
+
+// ── DATOS EDITABLES ───────────────────────────────────────────
+const titulo = "Recepción";
+const lugar = "Salón de Eventos “Real”";
+const direccion = "Av. Capitán Víctor Ustáriz Km 5";
+const hora = "Después de la ceremonia religiosa";
+const enlaceMapa = "https://maps.app.goo.gl/tmXz64b2YBd5Hm6F8";
+const textoBoton = "Ver ubicación";
+// ──────────────────────────────────────────────────────────────
+---
+
+<TarjetaLugar
+    id="recepcion-dia-1"
+    titulo={titulo}
+    icono="recepcion.png"
+    lugar={lugar}
+    direccion={direccion}
+    hora={hora}
+    enlaceMapa={enlaceMapa}
+    textoBoton={textoBoton}
+/>

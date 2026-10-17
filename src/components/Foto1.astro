@@ -1,0 +1,103 @@
+---
+// src/components/Foto1.astro
+// Foto de los novios a todo el ancho, con el borde de papel rasgado arriba y
+// abajo, sin marco. Al bajar, la foto llega agrandada dentro de su recorte y
+// se va acomodando a su tamaño a medida que el invitado scrollea, como un
+// acercamiento lento de película.
+//
+// El rasgado va en el contenedor y el zoom en la foto de adentro: así el
+// borde roto queda quieto mientras la imagen se mueve detrás.
+import { mascaraRasgada } from "../scripts/rasgado";
+
+// ── DATOS EDITABLES ───────────────────────────────────────────
+const altFoto = "Los novios";
+// ──────────────────────────────────────────────────────────────
+
+// La foto mide 900 x 1471. Semilla propia para que el borde no repita el
+// de la foto de los nombres.
+const mascaraUrl = mascaraRasgada({
+    ancho: 900,
+    alto: 1471,
+    arriba: true,
+    abajo: true,
+    semilla: 23,
+});
+---
+
+<section id="foto1" class="seccion-foto">
+    <div
+        class="recorte"
+        style={`-webkit-mask-image: ${mascaraUrl}; mask-image: ${mascaraUrl};`}
+    >
+        <img
+            id="foto1-imagen"
+            src="/imagenes/foto3.jpg"
+            alt={altFoto}
+            width="900"
+            height="1471"
+            class="foto"
+        />
+    </div>
+</section>
+
+<style>
+    .seccion-foto {
+        width: 100%;
+        max-width: 430px;
+        margin: 0 auto;
+    }
+
+    /* El recorte rasgado; lo que la foto agrandada saca afuera no se ve */
+    .recorte {
+        overflow: hidden;
+        -webkit-mask-size: 100% 100%;
+        mask-size: 100% 100%;
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+    }
+
+    .foto {
+        display: block;
+        width: 100%;
+        height: auto;
+        will-change: transform;
+    }
+</style>
+
+<script>
+    import { gsap } from "gsap";
+    import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+    gsap.registerPlugin(ScrollTrigger);
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const seccion = document.getElementById("foto1");
+        const foto = document.getElementById("foto1-imagen");
+        if (!seccion || !foto) return;
+
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+            return;
+        }
+
+        // La foto entra agrandada y un poco corrida hacia abajo, y vuelve a
+        // su tamaño justo cuando llega al centro de la pantalla. Va atada
+        // al scroll (scrub): si el invitado sube, el zoom vuelve con él.
+        // El scrub con número suaviza el seguimiento del dedo.
+        gsap.fromTo(
+            foto,
+            { scale: 1.3, yPercent: 7, opacity: 0.35 },
+            {
+                scale: 1,
+                yPercent: 0,
+                opacity: 1,
+                ease: "none",
+                scrollTrigger: {
+                    trigger: seccion,
+                    start: "top bottom",
+                    end: "center center",
+                    scrub: 1.2,
+                },
+            },
+        );
+    });
+</script>

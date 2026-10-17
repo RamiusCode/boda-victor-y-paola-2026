@@ -1,0 +1,249 @@
+---
+// src/components/Cronograma.astro
+// El itinerario del primer día en rojo y dorado: una línea dorada que baja por el
+// centro con un rombito en cada momento y, a un costado, la hora en dorado,
+// el nombre en Charm azul y el ícono azul debajo. Sin tarjetas ni marcos:
+// todo suelto sobre el papel, alternando izquierda / derecha.
+import Adorno from "./Adorno.astro";
+
+// ── DATOS EDITABLES ───────────────────────────────────────────
+const titulo = "Itinerario";
+
+// Los iconos salen de /public/iconos, donde cada archivo lleva el nombre
+// del momento al que corresponde. Cada elemento de "nombre" es un renglón.
+// Van en mayúsculas y minúsculas: Charm no tolera mayúsculas forzadas.
+const momentos = [
+    { nombre: ["Boda", "religiosa"], hora: "13:00 hrs.", icono: "iglesia.png" },
+    { nombre: ["Recepción"], hora: "16:30 hrs.", icono: "recepcion.png" },
+    { nombre: ["Baile de", "novios", "y padrinos"], hora: "17:00 hrs.", icono: "musica.png" },
+    { nombre: ["Brindis"], hora: "18:30 hrs.", icono: "brindis.png" },
+    { nombre: ["Cena"], hora: "19:00 hrs.", icono: "cena.png" },
+    { nombre: ["Comienza", "la fiesta"], hora: "20:00 hrs.", icono: "musica.png" },
+    { nombre: ["Corte", "de torta"], hora: "21:00 hrs.", icono: "torta.png" },
+    { nombre: ["Lanzamiento", "de bouquet"], hora: "22:00 hrs.", icono: "ramo.png" },
+    { nombre: ["Que siga", "la fiesta"], hora: "23:00 hrs.", icono: "musica.png" },
+];
+// ──────────────────────────────────────────────────────────────
+---
+
+<section id="cronograma" class="cronograma">
+    <div id="cronograma-titulo" class="cabecera">
+        <h2 class="titulo font-great-vibes">{titulo}</h2>
+        <Adorno class="adorno" />
+    </div>
+
+    <ol class="linea-tiempo">
+        {
+            momentos.map((momento, i) => (
+                <li class={`momento ${i % 2 === 0 ? "a-la-derecha" : "a-la-izquierda"}`}>
+                    {/* Rombito dorado sobre la línea, a la altura de la hora */}
+                    <span class="rombo" aria-hidden="true" />
+
+                    <div class="detalle">
+                        <p class="hora">{momento.hora}</p>
+                        <h3 class="nombre font-charm">
+                            {momento.nombre.map((linea) => (
+                                <span class="renglon">{linea}</span>
+                            ))}
+                        </h3>
+                        <span
+                            class="icono icono-azul"
+                            style={`--ic: url('/iconos/${momento.icono}')`}
+                            aria-hidden="true"
+                        />
+                    </div>
+                </li>
+            ))
+        }
+    </ol>
+</section>
+
+<style>
+    .cronograma {
+        --azul: #8e1426;
+        --dorado: #c6a24a;
+        --dorado-suave: rgba(198, 162, 74, 0.45);
+
+        width: 100%;
+        max-width: 430px;
+        margin: 0 auto;
+        padding: 2.4rem 1.1rem 3rem;
+        font-family: "Cormorant Garamond", serif;
+        font-weight: 500;
+        color: var(--azul);
+    }
+
+    .cabecera {
+        text-align: center;
+    }
+
+    .titulo {
+        color: var(--dorado);
+        font-size: clamp(2.6rem, 12.5vw, 3.2rem);
+        line-height: 1.2;
+        font-weight: 400;
+    }
+
+    .adorno {
+        display: block;
+        width: min(58%, 210px);
+        height: auto;
+        margin: 0.4rem auto 0;
+        color: var(--dorado);
+    }
+
+    /*
+       La línea dorada baja por el centro, por detrás de los rombos, y
+       se desvanece en las puntas para no cortar en seco.
+    */
+    .linea-tiempo {
+        position: relative;
+        margin: 2.2rem 0 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .linea-tiempo::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 50%;
+        width: 1px;
+        transform: translateX(-50%);
+        background-color: var(--dorado);
+        opacity: 0.8;
+    }
+
+    /*
+       Dos columnas iguales a cada lado de la línea. Cada momento usa una
+       sola y deja la otra vacía; los momentos se encabalgan un poco (margen
+       negativo) para que el zigzag no quede tan largo.
+    */
+    .momento {
+        position: relative;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        column-gap: 2.6rem;
+    }
+
+    .momento + .momento {
+        margin-top: -1.4rem;
+    }
+
+    .rombo {
+        position: absolute;
+        top: 0.55rem;
+        left: 50%;
+        width: 8px;
+        height: 8px;
+        background-color: var(--dorado);
+        transform: translateX(-50%) rotate(45deg);
+        box-shadow: 0 0 0 3px #fbf8f1;
+    }
+
+    /* Un hilo dorado une el rombo con la hora */
+    .rombo::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        width: 1.4rem;
+        height: 1px;
+        background-color: var(--dorado);
+        opacity: 0.6;
+    }
+
+    /*
+       El rombo va girado 45°: el hilo se gira de vuelta para quedar
+       horizontal, saliendo hacia el lado del texto.
+    */
+    .a-la-derecha .rombo::after {
+        left: 50%;
+        transform: rotate(-45deg);
+        transform-origin: left center;
+    }
+
+    .a-la-izquierda .rombo::after {
+        right: 50%;
+        transform: rotate(-45deg);
+        transform-origin: right center;
+    }
+
+    .detalle {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .a-la-derecha .detalle {
+        grid-column: 2;
+    }
+
+    .a-la-izquierda .detalle {
+        grid-column: 1;
+    }
+
+    .hora {
+        color: var(--dorado);
+        font-size: clamp(1.1rem, 5.2vw, 1.3rem);
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        line-height: 1.2;
+        /* números parejos: en Cormorant algunos bajan de la línea */
+        font-variant-numeric: lining-nums;
+    }
+
+    .nombre {
+        margin-top: 0.15rem;
+        font-size: clamp(1.2rem, 5.6vw, 1.4rem);
+        font-weight: 400;
+        line-height: 1.22;
+    }
+
+    .renglon {
+        display: block;
+        white-space: nowrap;
+    }
+
+    /* El ícono debajo del nombre, con una sombra muy fina */
+    .icono {
+        width: clamp(38px, 10.5vw, 46px);
+        height: clamp(38px, 10.5vw, 46px);
+        margin-top: 0.45rem;
+        filter: drop-shadow(0 2px 2px rgba(142, 20, 38, 0.18));
+    }
+
+    .icono-azul {
+        background-color: var(--azul);
+    }
+</style>
+
+<script>
+    import { entradaConjunta, gestos } from "../scripts/animaciones";
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const seccion = document.getElementById("cronograma");
+        if (!seccion) return;
+        const $ = (sel: string) => seccion.querySelector(sel);
+
+        entradaConjunta($(".cabecera"), [
+            [$(".titulo"), gestos.trazo],
+            [$(".adorno"), gestos.abrir],
+        ]);
+
+        /*
+           Cada momento se dispara con su propio trigger: la lista es larga
+           y, con uno solo, los últimos se animarían todavía fuera de
+           pantalla. En cada momento, todo a la vez: la hora baja, el nombre
+           se escribe y el ícono crece.
+        */
+        seccion.querySelectorAll<HTMLElement>(".momento").forEach((momento) => {
+            entradaConjunta(momento, [
+                [momento.querySelector(".hora"), gestos.bajar],
+                [momento.querySelector(".nombre"), gestos.trazo],
+                [momento.querySelector(".icono"), gestos.crecer],
+            ]);
+        });
+    });
+</script>

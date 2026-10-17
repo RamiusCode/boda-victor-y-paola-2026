@@ -1,0 +1,242 @@
+---
+// src/components/NombresPadres.astro
+// Padres y padrinos en azul y dorado, sobre el papel de fondo, sin marco.
+//
+// Dos partes separadas por el adorno dorado: primero los padres, después
+// los padrinos. En cada grupo el título va en dorado y en Great Vibes, y
+// los nombres en azul y en Charm, la letra del resto de la invitación.
+// Un ramo azul acompaña a cada grupo desde el costado, en zigzag:
+// izquierda, derecha, izquierda, derecha.
+import Adorno from "./Adorno.astro";
+
+// ── DATOS EDITABLES ───────────────────────────────────────────
+const intro = "Con la bendición de Dios y el amor de nuestros padres";
+
+const padres = [
+    {
+        titulo: "Padres del Novio",
+        nombres: ["Victor Lima Huaquipa (+)", "Ines Gonzales Morales"],
+    },
+    {
+        titulo: "Padres de la Novia",
+        nombres: ["Moises Hurtado Gatica (+)", "Sandra Nuñez Chumacero"],
+    },
+];
+
+const tituloPadrinos = "Nuestros padrinos";
+
+const padrinos = [
+    {
+        titulo: "Padrinos de Religión",
+        nombres: ["Ronald Hurtado Gatica", "Jaqueline Gonzales Montecinos"],
+    },
+    {
+        titulo: "Padrinos de Civil",
+        nombres: ["Antonio Gonzales", "Vilma Sejas"],
+    },
+];
+
+const cierre =
+    "A ellos agradecemos todo su amor incondicional para guiarnos en cada etapa de nuestras vidas";
+// ──────────────────────────────────────────────────────────────
+---
+
+<section id="padres" class="padres">
+    <p class="intro font-charm">{intro}</p>
+
+    {
+        padres.map((grupo, i) => (
+            <div class="grupo">
+                <img
+                    src={`/imagenes/florlateral2-${i % 2 === 0 ? "izq" : "der"}.png`}
+                    alt=""
+                    width="320"
+                    height="549"
+                    class={`flor-lateral ${i % 2 === 0 ? "flor-izq" : "flor-der"}`}
+                    aria-hidden="true"
+                />
+                <h3 class="titulo font-great-vibes">{grupo.titulo}</h3>
+                {grupo.nombres.map((nombre) => (
+                    <p class="nombre font-charm">{nombre}</p>
+                ))}
+            </div>
+        ))
+    }
+
+    <Adorno class="adorno" />
+
+    <p class="subtitulo font-charm">{tituloPadrinos}</p>
+
+    {
+        padrinos.map((grupo, i) => (
+            <div class="grupo">
+                <img
+                    src={`/imagenes/florlateral2-${i % 2 === 0 ? "izq" : "der"}.png`}
+                    alt=""
+                    width="320"
+                    height="549"
+                    class={`flor-lateral ${i % 2 === 0 ? "flor-izq" : "flor-der"}`}
+                    aria-hidden="true"
+                />
+                <h3 class="titulo font-great-vibes">{grupo.titulo}</h3>
+                {grupo.nombres.map((nombre) => (
+                    <p class="nombre font-charm">{nombre}</p>
+                ))}
+            </div>
+        ))
+    }
+
+    <p class="cierre font-charm">{cierre}</p>
+</section>
+
+<style>
+    /*
+       z-index 0 arma la caja de apilado del bloque: así los ramos, que van
+       en -1, quedan encima del fondo pero detrás de los nombres.
+    */
+    .padres {
+        --azul: #8e1426;
+        --dorado: #c6a24a;
+
+        position: relative;
+        z-index: 0;
+
+        width: 100%;
+        max-width: 430px;
+        margin: 0 auto;
+        padding: 2.6rem 1.6rem 2.8rem;
+        text-align: center;
+        font-family: "Cormorant Garamond", serif;
+        font-weight: 500;
+        color: var(--azul);
+    }
+
+    .intro,
+    .cierre {
+        max-width: 19rem;
+        margin: 0 auto;
+        font-size: clamp(1.25rem, 5.8vw, 1.45rem);
+        line-height: 1.6;
+    }
+
+    /* Un rombito dorado entre grupo y grupo, y ninguno antes del primero */
+    .grupo {
+        position: relative;
+        margin-top: 2.2rem;
+    }
+
+    /*
+       El ramo se sale 1.6rem, lo que mide el padding del bloque, para
+       llegar al borde de la pantalla. La derecha va espejada en su archivo.
+    */
+    .flor-lateral {
+        position: absolute;
+        top: 50%;
+        z-index: -1;
+        width: 19%;
+        height: auto;
+        /* translate y no transform: la animación escribe su propio
+           transform y así no le pisa el centrado */
+        translate: 0 -40%;
+        pointer-events: none;
+    }
+
+    .flor-izq {
+        left: -1.6rem;
+    }
+
+    .flor-der {
+        right: -1.6rem;
+    }
+
+    .grupo::before {
+        content: "";
+        display: block;
+        width: 6px;
+        height: 6px;
+        margin: 0 auto 1.6rem;
+        background-color: var(--dorado);
+        opacity: 0.75;
+        transform: rotate(45deg);
+    }
+
+    .intro + .grupo::before,
+    .subtitulo + .grupo::before {
+        display: none;
+    }
+
+    .titulo {
+        color: var(--dorado);
+        /* Great Vibes trae poco aire entre palabras: se pegaban */
+        word-spacing: 0.15em;
+        font-size: clamp(2rem, 9.5vw, 2.45rem);
+        line-height: 1.2;
+        font-weight: 400;
+    }
+
+    /*
+       Nombres en Charm, sin mayúsculas forzadas ni espaciado (esa letra no
+       los tolera). Los largos bajan de renglón en vez de achicarse.
+    */
+    .nombre {
+        margin-top: 0.3rem;
+        font-size: clamp(1.25rem, 5.8vw, 1.45rem);
+        font-weight: 400;
+        line-height: 1.45;
+    }
+
+    .adorno {
+        display: block;
+        width: min(58%, 210px);
+        height: auto;
+        margin: 2.6rem auto 0;
+        color: var(--dorado);
+    }
+
+    .subtitulo {
+        margin-top: 1rem;
+        font-size: clamp(1.25rem, 5.8vw, 1.45rem);
+        line-height: 1.3;
+    }
+
+    .cierre {
+        margin-top: 2.8rem;
+    }
+</style>
+
+<script>
+    import { entradaConjunta, gestos } from "../scripts/animaciones";
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const seccion = document.getElementById("padres");
+        if (!seccion) return;
+        const $ = (sel: string) => seccion.querySelector(sel);
+
+        // Cada parte entra cuando asoma en pantalla, con todos sus elementos
+        // a la vez y cada uno con un gesto distinto.
+        entradaConjunta($(".intro"), [[$(".intro"), gestos.bajar]]);
+
+        seccion.querySelectorAll<HTMLElement>(".grupo").forEach((grupo) => {
+            const flor = grupo.querySelector(".flor-lateral");
+            const lado = flor?.classList.contains("flor-izq") ? "izq" : "der";
+            const [primero, segundo] = grupo.querySelectorAll(".nombre");
+
+            // El título se escribe, los dos nombres se cruzan y el ramo
+            // crece desde su borde
+            entradaConjunta(grupo, [
+                [grupo.querySelector(".titulo"), gestos.trazo],
+                [primero, gestos.desdeDerecha],
+                [segundo, gestos.desdeIzquierda],
+                [flor, gestos.ramo(lado)],
+            ]);
+        });
+
+        // El adorno se abre y el subtítulo se acerca
+        entradaConjunta($(".adorno"), [
+            [$(".adorno"), gestos.abrir],
+            [$(".subtitulo"), gestos.acercar],
+        ]);
+
+        entradaConjunta($(".cierre"), [[$(".cierre"), gestos.subir]]);
+    });
+</script>

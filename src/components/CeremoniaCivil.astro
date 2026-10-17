@@ -1,0 +1,26 @@
+---
+// src/components/CeremoniaCivil.astro
+// La ceremonia civil y la recepción del segundo día: solo los datos. El
+// diseño está en TarjetaLugar, el mismo de la ceremonia religiosa.
+import TarjetaLugar from "./TarjetaLugar.astro";
+
+// ── DATOS EDITABLES ───────────────────────────────────────────
+const titulo = "Ceremonia Civil y Recepción";
+const lugar = "Salón de Eventos “Real”";
+const direccion = "Av. Capitán Víctor Ustáriz Km 5";
+const hora = "15:00 hrs.";
+const enlaceMapa = "https://maps.app.goo.gl/tmXz64b2YBd5Hm6F8";
+const textoBoton = "Ver ubicación";
+// ──────────────────────────────────────────────────────────────
+---
+
+<TarjetaLugar
+    id="ceremonia-civil"
+    titulo={titulo}
+    icono="brindis.png"
+    lugar={lugar}
+    direccion={direccion}
+    hora={hora}
+    enlaceMapa={enlaceMapa}
+    textoBoton={textoBoton}
+/>

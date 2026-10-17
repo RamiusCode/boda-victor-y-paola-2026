@@ -1,0 +1,227 @@
+---
+// src/components/ConfirmarAsistencia.astro
+// Pedido de confirmación, suelto sobre el papel y sin marco: título dorado
+// en Great Vibes, el adorno, el texto en Charm azul, el botón azul que abre
+// WhatsApp y el cierre. Un ramo azul asoma a cada costado.
+import Adorno from "./Adorno.astro";
+
+// ── DATOS EDITABLES ───────────────────────────────────────────
+const titulo = "Confirmar asistencia";
+
+const parrafos = [
+    "¡Nuestra mayor ilusión es celebrar contigo!",
+    "Por favor, ayúdanos a preparar todo con amor confirmando tu asistencia.",
+];
+
+const textoBoton = "Confirmar";
+const cierre = "Nos encantaría compartir nuestra felicidad contigo";
+
+// WhatsApp de los novios, con el código de país y sin signos ni espacios.
+// Vacío en la plantilla de muestra: el botón queda en "#" y no abre nada.
+const whatsapp = "59165336674";
+
+// El mensaje se arma con estos dos, así los nombres y la fecha no quedan
+// escritos a mano dentro de la frase.
+const novios = "Victor y Paola";
+const fechas = "los días 12, 13 y 14 de diciembre de 2026";
+// ──────────────────────────────────────────────────────────────
+
+const mensaje = `Me complace confirmar mi asistencia a la boda de ${novios}, que se realizará ${fechas}. Estaré sin falta. ¡Muchas gracias!`;
+
+const enlace = whatsapp
+    ? `https://wa.me/${whatsapp}?text=${encodeURIComponent(mensaje)}`
+    : "#";
+---
+
+<section id="confirmar-asistencia" class="confirmar">
+    <img
+        src="/imagenes/lateral-izq.png"
+        alt=""
+        width="300"
+        height="791"
+        class="lateral lateral-izq"
+        aria-hidden="true"
+    />
+    <img
+        src="/imagenes/lateral-der.png"
+        alt=""
+        width="300"
+        height="791"
+        class="lateral lateral-der"
+        aria-hidden="true"
+    />
+
+    <h2 class="titulo font-great-vibes">{titulo}</h2>
+    <Adorno class="adorno" />
+
+    <div class="texto font-charm">
+        {parrafos.map((parrafo) => <p class="parrafo">{parrafo}</p>)}
+    </div>
+
+    <!-- Con "#" no abre pestaña nueva: no tendría adónde ir -->
+    <a
+        class="boton"
+        href={enlace}
+        target={enlace === "#" ? undefined : "_blank"}
+        rel="noopener noreferrer"
+    >
+        <!-- Globo de mensaje, delante del texto -->
+        <svg
+            class="globo"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+        >
+            <path d="M4 18.5l1.2-3.6A7.5 7.5 0 1 1 8.6 18z"></path>
+        </svg>
+        <span>{textoBoton}</span>
+    </a>
+
+    <p class="cierre font-great-vibes">{cierre}</p>
+</section>
+
+<style>
+    /*
+       z-index 0 arma la caja de apilado del bloque: así los ramos, que van
+       en -1, quedan encima del fondo pero detrás del texto.
+    */
+    .confirmar {
+        --azul: #8e1426;
+        --dorado: #c6a24a;
+
+        position: relative;
+        z-index: 0;
+        width: 100%;
+        max-width: 430px;
+        margin: 0 auto;
+        padding: 2.6rem 1.5rem 2.8rem;
+        text-align: center;
+        color: var(--azul);
+    }
+
+    .lateral {
+        position: absolute;
+        top: 50%;
+        z-index: -1;
+        width: 14%;
+        height: auto;
+        /* translate y no transform: la animación escribe su propio
+           transform y así no le pisa el centrado */
+        translate: 0 -50%;
+        pointer-events: none;
+    }
+
+    .lateral-izq {
+        left: 0;
+    }
+
+    .lateral-der {
+        right: 0;
+    }
+
+    .titulo {
+        color: var(--dorado);
+        font-size: clamp(2.3rem, 11vw, 2.9rem);
+        line-height: 1.2;
+        font-weight: 400;
+        /* Great Vibes trae poco aire entre palabras */
+        word-spacing: 0.15em;
+    }
+
+    .adorno {
+        display: block;
+        width: min(58%, 210px);
+        height: auto;
+        margin: 0.4rem auto 0;
+        color: var(--dorado);
+    }
+
+    /*
+       El texto corta solo dentro del hueco que dejan los dos ramos (14% del
+       ancho cada uno) y medio rem de aire a cada lado. El 72% se mide sobre
+       el contenido, que es el ancho menos los 3rem de padding: de ahí el
+       ajuste de 2.16rem para que coincida con el ancho total.
+    */
+    .texto {
+        max-width: min(17rem, calc(72% + 2.16rem - 1rem));
+        margin: 1.1rem auto 0;
+    }
+
+    .parrafo {
+        font-size: clamp(1.25rem, 5.8vw, 1.45rem);
+        line-height: 1.55;
+    }
+
+    .parrafo + .parrafo {
+        margin-top: 0.7rem;
+    }
+
+    /* El mismo botón azul de "Ver ubicación" */
+    .boton {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        margin-top: 1.6rem;
+        padding: 0.65rem 1.6rem;
+        border-radius: 999px;
+        background-color: var(--azul);
+        box-shadow:
+            inset 0 0 0 2px var(--azul),
+            inset 0 0 0 3px rgba(232, 205, 140, 0.75),
+            0 8px 18px rgba(142, 20, 38, 0.25);
+        color: #ffffff;
+        font-family: "Cormorant Garamond", serif;
+        font-size: clamp(0.92rem, 4.3vw, 1.05rem);
+        font-weight: 600;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        text-decoration: none;
+    }
+
+    .globo {
+        width: 1.15em;
+        height: 1.15em;
+        color: #e8cd8c;
+    }
+
+    .cierre {
+        max-width: 17rem;
+        margin: 1.6rem auto 0;
+        font-size: clamp(1.9rem, 9vw, 2.3rem);
+        line-height: 1.25;
+        /* Great Vibes trae poco aire entre palabras */
+        word-spacing: 0.15em;
+    }
+</style>
+
+<script>
+    import { entradaConjunta, gestos } from "../scripts/animaciones";
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const seccion = document.getElementById("confirmar-asistencia");
+        if (!seccion) return;
+        const $ = (sel: string) => seccion.querySelector(sel);
+        const [primero, segundo] = seccion.querySelectorAll(".parrafo");
+
+        // Arriba, todo a la vez: los ramos crecen desde los bordes, el
+        // título se escribe, el adorno se abre y los párrafos se cruzan
+        entradaConjunta(seccion, [
+            [$(".lateral-izq"), gestos.ramo("izq")],
+            [$(".lateral-der"), gestos.ramo("der")],
+            [$(".titulo"), gestos.trazo],
+            [$(".adorno"), gestos.abrir],
+            [primero, gestos.desdeDerecha],
+            [segundo, gestos.desdeIzquierda],
+        ]);
+
+        // Abajo: el botón se acerca y el cierre sube
+        entradaConjunta($(".boton"), [
+            [$(".boton"), gestos.acercar],
+            [$(".cierre"), gestos.subir],
+        ]);
+    });
+</script>

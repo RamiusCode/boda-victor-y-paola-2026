@@ -1,0 +1,156 @@
+---
+// src/components/CodigoVestimenta.astro
+// Código de vestimenta, suelto sobre el papel y sin marco: título dorado en
+// Great Vibes, el adorno, las siluetas azules de los novios, la etiqueta y
+// la nota en Charm azul. Un ramo azul asoma a cada costado de las siluetas.
+import Adorno from "./Adorno.astro";
+
+// ── DATOS EDITABLES ───────────────────────────────────────────
+const titulo = "Código de vestimenta";
+const etiqueta = "Formal";
+const nota =
+    "Con cariño, reservamos el blanco y el crema para la novia.";
+// ──────────────────────────────────────────────────────────────
+---
+
+<section id="vestimenta" class="vestimenta">
+    <h2 class="titulo font-great-vibes">{titulo}</h2>
+    <Adorno class="adorno" />
+
+    <div class="escena">
+        <img
+            src="/imagenes/lateral-izq.png"
+            alt=""
+            width="300"
+            height="791"
+            class="lateral lateral-izq"
+            aria-hidden="true"
+        />
+        <img
+            src="/imagenes/codigo.png"
+            alt="Novio de traje y novia de vestido largo"
+            width="1402"
+            height="1122"
+            class="siluetas"
+        />
+        <img
+            src="/imagenes/lateral-der.png"
+            alt=""
+            width="300"
+            height="791"
+            class="lateral lateral-der"
+            aria-hidden="true"
+        />
+    </div>
+
+    <p class="etiqueta font-charm">{etiqueta}</p>
+
+    <p class="nota font-charm">{nota}</p>
+</section>
+
+<style>
+    .vestimenta {
+        --azul: #8e1426;
+        --dorado: #c6a24a;
+
+        width: 100%;
+        max-width: 430px;
+        margin: 0 auto;
+        padding: 2.6rem 1.5rem 2.8rem;
+        text-align: center;
+        color: var(--azul);
+    }
+
+    .titulo {
+        color: var(--dorado);
+        font-size: clamp(2.3rem, 11vw, 2.9rem);
+        line-height: 1.2;
+        font-weight: 400;
+        /* Great Vibes trae poco aire entre palabras */
+        word-spacing: 0.15em;
+    }
+
+    .adorno {
+        display: block;
+        width: min(58%, 210px);
+        height: auto;
+        margin: 0.4rem auto 0;
+        color: var(--dorado);
+    }
+
+    /*
+       Las siluetas al centro y un ramo a cada lado. Los ramos se salen
+       1.5rem, lo que mide el padding del bloque, para llegar al borde.
+    */
+    .escena {
+        position: relative;
+        margin: 1.6rem -1.5rem 0;
+    }
+
+    .siluetas {
+        display: block;
+        width: 50%;
+        height: auto;
+        margin: 0 auto;
+        filter: drop-shadow(0 4px 6px rgba(142, 20, 38, 0.15));
+    }
+
+    .lateral {
+        position: absolute;
+        top: 50%;
+        width: 20%;
+        height: auto;
+        /* translate y no transform: la animación escribe su propio
+           transform y así no le pisa el centrado */
+        translate: 0 -50%;
+        pointer-events: none;
+    }
+
+    .lateral-izq {
+        left: 0;
+    }
+
+    .lateral-der {
+        right: 0;
+    }
+
+    .etiqueta {
+        margin-top: 1rem;
+        color: var(--dorado);
+        font-size: clamp(2rem, 9.5vw, 2.5rem);
+        line-height: 1.2;
+    }
+
+    .nota {
+        max-width: 18rem;
+        margin: 0.8rem auto 0;
+        font-size: clamp(1.25rem, 5.8vw, 1.45rem);
+        line-height: 1.55;
+    }
+</style>
+
+<script>
+    import { entradaConjunta, gestos } from "../scripts/animaciones";
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const seccion = document.getElementById("vestimenta");
+        if (!seccion) return;
+        const $ = (sel: string) => seccion.querySelector(sel);
+
+        // Arriba, todo a la vez: el título se escribe, el adorno se abre,
+        // las siluetas suben y los ramos crecen desde los bordes
+        entradaConjunta(seccion, [
+            [$(".titulo"), gestos.trazo],
+            [$(".adorno"), gestos.abrir],
+            [$(".siluetas"), gestos.subir],
+            [$(".lateral-izq"), gestos.ramo("izq")],
+            [$(".lateral-der"), gestos.ramo("der")],
+        ]);
+
+        // Abajo: la etiqueta se acerca y la nota sube
+        entradaConjunta($(".etiqueta"), [
+            [$(".etiqueta"), gestos.acercar],
+            [$(".nota"), gestos.subir],
+        ]);
+    });
+</script>

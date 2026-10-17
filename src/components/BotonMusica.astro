@@ -1,0 +1,92 @@
+---
+// src/components/BotonMusica.astro
+// Botón flotante abajo a la derecha para pausar / reanudar la melodía.
+// Controla el mismo audio que arranca la portada (window.audioGlobal).
+---
+
+<button
+    id="boton-musica"
+    type="button"
+    aria-label="Pausar o reanudar la música"
+    class="fixed bottom-5 right-5 z-[9000] w-12 h-12 rounded-full boton-azul shadow-[0_6px_16px_rgba(0,0,0,0.28)] flex items-center justify-center opacity-0 pointer-events-none transition-all duration-300 hover:scale-105 cursor-pointer"
+>
+    <!--
+       El icono anuncia lo que pasa al tocarlo, no el estado actual:
+       nota limpia = está en pausa, tocá para reanudar.
+    -->
+    <svg
+        id="icono-nota"
+        class="w-[22px] h-[22px] hidden"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+    >
+        <path d="M9 18V6.5l10-2v11"></path>
+        <circle cx="6.5" cy="18" r="2.5"></circle>
+        <circle cx="16.5" cy="15.5" r="2.5"></circle>
+    </svg>
+
+    <!-- Nota tachada = está sonando, tocá para silenciar. -->
+    <svg
+        id="icono-nota-tachada"
+        class="w-[22px] h-[22px]"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.8"
+        stroke-linecap="round"
+    >
+        <path d="M9 18V6.5l10-2v11"></path>
+        <circle cx="6.5" cy="18" r="2.5"></circle>
+        <circle cx="16.5" cy="15.5" r="2.5"></circle>
+        <path d="M3 3l18 18"></path>
+    </svg>
+</button>
+
+<style>
+    /* El azul del diseño, el mismo que usan los bloques de la invitación */
+    .boton-azul {
+        background-color: #8e1426;
+        color: #ffffff;
+    }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const boton = document.getElementById("boton-musica");
+        const iconoNota = document.getElementById("icono-nota");
+        const iconoTachado = document.getElementById("icono-nota-tachada");
+        if (!boton) return;
+
+        // Mientras suena se muestra la nota tachada (tocá para silenciar) y
+        // en pausa la nota limpia (tocá para reanudar).
+        const pintarEstado = (sonando: boolean) => {
+            iconoTachado?.classList.toggle("hidden", !sonando);
+            iconoNota?.classList.toggle("hidden", sonando);
+        };
+
+        // Aparece recién cuando la portada arranca la melodía
+        const esperar = setInterval(() => {
+            const audio = (window as any).audioGlobal as
+                | HTMLAudioElement
+                | undefined;
+            if (!audio) return;
+            clearInterval(esperar);
+
+            boton.classList.remove("opacity-0", "pointer-events-none");
+            boton.classList.add("opacity-100");
+
+            pintarEstado(!audio.paused);
+            audio.addEventListener("play", () => pintarEstado(true));
+            audio.addEventListener("pause", () => pintarEstado(false));
+
+            boton.addEventListener("click", () => {
+                if (audio.paused) audio.play();
+                else audio.pause();
+                (window as any).estaReproduciendoGlobal = !audio.paused;
+            });
+        }, 200);
+    });
+</script>
